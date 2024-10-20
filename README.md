@@ -5,7 +5,7 @@ Project for Backend Python Developer Selection for b2bit
 
 
 ```bash
-git clone git@github.com:PedroRegisPOAR/mini-twitter-b2bit.git \
+git clone https://github.com/PedroRegisPOAR/mini-twitter-b2bit.git \
 && cd mini-twitter-b2bit \
 && git checkout dev
 ```

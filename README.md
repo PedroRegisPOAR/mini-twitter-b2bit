@@ -10,6 +10,17 @@ git clone https://github.com/PedroRegisPOAR/mini-twitter-b2bit.git \
 && git checkout dev
 ```
 
+
+If using docker:
+```bash
+docker build . --tag minitwitter:0.0.1
+```
+
+```bash
+docker run -it --publish=8000:8000 --rm minitwitter:0.0.1
+```
+
+
 If running with your local python:
 ```bash
 python3 -m venv .venv \
@@ -17,10 +28,22 @@ python3 -m venv .venv \
 && pip3 install --requirement requirements.txt
 ```
 
-
 ```bash
 python manage.py migrate \
 && python manage.py runserver
+```
+
+
+
+Testing:
+```bash
+curl http://127.0.0.1:8000/ | grep -q 'The install worked successfully! Congratulations!'
+echo $?
+```
+
+Or open in browser:
+```bash
+firefox http://127.0.0.1:8000/ 
 ```
 
 

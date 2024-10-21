@@ -75,8 +75,12 @@ WSGI_APPLICATION = "minitwitter.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "drf_dev",
+        "USER": "db_user",
+        "PASSWORD": "db_pass",
+        "HOST": "db",
+        "PORT": "5432",
     }
 }
 

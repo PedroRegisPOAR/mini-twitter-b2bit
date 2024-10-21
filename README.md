@@ -11,14 +11,22 @@ git clone https://github.com/PedroRegisPOAR/mini-twitter-b2bit.git \
 ```
 
 
-If using docker:
+If using docker-compose:
 ```bash
-docker build . --tag minitwitter:0.0.1
+docker-compose up --detach --build
 ```
 
+
+Extra, checking api logs:
 ```bash
-docker run -it --publish=8000:8000 --rm minitwitter:0.0.1
+docker-compose logs --follow apidrf 
 ```
+
+Extra, checking database logs:
+```bash
+docker-compose logs --follow db 
+```
+
 
 
 If running with your local python:
@@ -33,9 +41,7 @@ python manage.py migrate \
 && python manage.py runserver
 ```
 
-
-
-Testing:
+Testing the API:
 ```bash
 curl http://127.0.0.1:8000/ | grep -q 'The install worked successfully! Congratulations!'
 echo $?
@@ -47,7 +53,7 @@ firefox http://127.0.0.1:8000/
 ```
 
 
-### Installing docker
+### Installing docker and docker-compose
 
 
 ```bash
@@ -66,3 +72,12 @@ Refs.:
 - https://unix.stackexchange.com/a/517319
 - https://github.com/moby/moby/issues/39869#issuecomment-981563758
 - https://superuser.com/a/609141
+
+
+```bash
+sudo curl -L \
+"https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" \
+-o /usr/local/bin/docker-compose \
+&& sudo chmod +x /usr/local/bin/docker-compose \
+&& docker-compose --version
+```

@@ -1,3 +1,14 @@
+### Only docker usage notes
+
+
+If using only docker:
+```bash
+docker build . --tag minitwitter:0.0.1
+```
+
+```bash
+docker run -it --publish=8000:8000 --rm minitwitter:0.0.1
+```
 
 
 ### Bootstrapping django rest project

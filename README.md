@@ -10,6 +10,11 @@ git clone https://github.com/PedroRegisPOAR/mini-twitter-b2bit.git \
 && git checkout dev
 ```
 
+Copy the default `.env.example` to `.env` and if you want to set any secret set it in the `.env`.
+```bash
+cp -v .env.example .env
+```
+
 
 If using docker-compose:
 ```bash

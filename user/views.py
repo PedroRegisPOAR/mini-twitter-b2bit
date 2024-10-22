@@ -10,7 +10,7 @@ from .pagination import CustomPagination
 
 
 class UserViewSet(ViewSet):
-    @extend_schema(request=UserSerializer, responses={200: UserSerializer})
+    @extend_schema(request=UserSerializer, responses={201: UserSerializer})
     def create(self, request):
         data = request.data
         serializer = UserSerializer(data=data)

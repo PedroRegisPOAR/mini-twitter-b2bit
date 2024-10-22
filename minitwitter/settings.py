@@ -41,7 +41,15 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    'rest_framework',
+    'drf_spectacular',
+    'user'
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -129,3 +137,15 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+AUTH_USER_MODEL = "user.User"
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Mini twitter',
+    'DESCRIPTION': 'API documentation for minitwitter.',
+    'VERSION': '0.0.1',
+    'SERVERS': [
+        {'url': 'http://localhost:8000',  # TODO: maybe get it with os.environ.get?
+         'description': 'Development server'},
+    ],
+}

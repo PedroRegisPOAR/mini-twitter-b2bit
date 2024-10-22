@@ -21,6 +21,11 @@ If using docker-compose:
 docker-compose up --detach --build
 ```
 
+Acessing the api, swagger or the admin page:
+- http://localhost:8000/api
+- http://localhost:8000/api/swagger
+- http://localhost:8000/admin
+
 
 Extra, checking api logs:
 ```bash
@@ -32,6 +37,10 @@ Extra, checking database logs:
 docker-compose logs --follow db 
 ```
 
+Running the unit tests:
+```bash
+docker-compose exec apidrf python manage.py test
+```
 
 
 If running with your local python:

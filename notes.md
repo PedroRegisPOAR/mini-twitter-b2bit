@@ -14,6 +14,12 @@ REST_FRAMEWORK = {
 
 ### About JWT
 
+#### djangorestframework_simplejwt
+
+
+
+
+#### 
 WIP: when other parts are finished came back to this.
 
 Add the library to requirements.txt:

@@ -2,7 +2,7 @@ import uuid
 
 from django.db import models
 from django.contrib.auth.validators import UnicodeUsernameValidator
-from django.contrib.auth.models import AbstractBaseUser
+from django.contrib.auth.models import AbstractBaseUser, UserManager
 
 
 class BaseModel(models.Model):
@@ -23,13 +23,15 @@ class User(AbstractBaseUser, BaseModel):
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = []
 
+    objects = UserManager()
+
     class Meta:
         ordering = ["-created_at"]
         verbose_name = "Usuário"
         verbose_name_plural = "Usuários"
 
     def __str__(self):
-        return f"{self.verbose_name} ({self.username})"
+        return f"Usuário ({self.username})"
 
 
 class Follower(BaseModel):

@@ -36,15 +36,15 @@ class User(AbstractBaseUser, PermissionsMixin, BaseModel):
         return f"Usuário ({self.username})"
 
 
-# class Follower(BaseModel):
-#     following = models.ForeignKey(to=User, on_delete=models.PROTECT, related_name="followings")
-#     follower = models.ForeignKey(to=User, on_delete=models.PROTECT, related_name="followers")
-#
-#     class Meta:
-#         unique_together = (('following', 'follower'),)
-#         ordering = ["-created_at"]
-#         verbose_name = "Seguidor"
-#         verbose_name_plural = "Seguidores"
-#
-#     def __str__(self):
-#         return f"{self.follower.username} segue {self.following.username}"
+class Follower(BaseModel):
+    following = models.ForeignKey(to=User, on_delete=models.PROTECT, related_name="followings")
+    follower = models.ForeignKey(to=User, on_delete=models.PROTECT, related_name="followers")
+
+    class Meta:
+        unique_together = (('following', 'follower'),)
+        ordering = ["-created_at"]
+        verbose_name = "Seguidor"
+        verbose_name_plural = "Seguidores"
+
+    def __str__(self):
+        return f"{self.follower.username} segue {self.following.username}"

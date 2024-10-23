@@ -5,16 +5,24 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from drf_spectacular.utils import extend_schema
 
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from .models import User
+from .models import User, Follower
 from .serializers import UserSerializer, FollowerSerializer
 from .pagination import CustomPagination
 
 
 
 class UserViewSet(ViewSet):
+    def get_permissions(self):
+        if self.action == 'create':
+            # Allow any user to access the create endpoint
+            self.permission_classes = [AllowAny]
+        else:
+            # Require authentication for other actions
+            self.permission_classes = [IsAuthenticated]
+        return super().get_permissions()
 
     @extend_schema(request=UserSerializer, responses={201: UserSerializer})
     def create(self, request):

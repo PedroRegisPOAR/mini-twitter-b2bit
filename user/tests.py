@@ -1,6 +1,6 @@
 from django.test import TestCase
 from rest_framework import status
-from .models import User
+from .models import User, Follower
 
 
 from rest_framework.test import APITestCase
@@ -13,9 +13,6 @@ from django.urls import reverse
 class BaseTestCase(TestCase):
     def setUp(self):
         super().setUp()
-        self.api = self.client
-        # self.client = None
-
 
 
 class AuthTests(APITestCase):
@@ -96,7 +93,7 @@ class UserViewSetTestCase(BaseTestCase):
             password="123",
         )
 
-        response = self.api.post(path="/api/user/", data=data)
+        response = self.client.post(path="/api/user/", data=data)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         self.assertIn("id", response.data)
@@ -165,48 +162,57 @@ class UserViewSetTestCase(BaseTestCase):
 #
 #         response = self.api.post(path="/api/user/", data=data)
 #         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-#
-#     def test_follow_1(self):
-#         """
-#         Dado:
-#           - dois usuários cadastrados e um segue o outro
-#         Quando
-#           - for feita a requisição de
-#             `/api/user/{user1.id}/followers/`
-#         Então:
-#           - o status da resposta deve ser HTTP_200_OK
-#         """
-#         data1 = dict(
-#             username="foobar1",
-#             email="foo@bar.com",
-#             name="Foo1",
-#             password="123",
-#         )
-#         data2 = dict(
-#             username="foobar2",
-#             email="foo@bar2.com",
-#             name="Foo2",
-#             password="123",
-#         )
-#
-#         user1 = User.objects.create(**data1)
-#         user2 = User.objects.create(**data2)
-#
-#         Follower.objects.create(following=user1, follower=user2)
-#
-#         response = self.api.get(path=f"/api/user/{user1.id}/followers/")
-#
-#         self.assertEqual(response.status_code, status.HTTP_200_OK)
-#
-#         result_data = response.data
-#         for result in result_data["results"]:
-#             self.assertIn("id", result)
-#             del result["id"]
-#
-#         expected_data = {
-#              "count": 1,
-#              'next': None,
-#              'previous': None,
-#              'results': [{'username': 'foobar2', 'name': 'Foo2'}],
-#         }
-#         self.assertDictEqual(result_data, expected_data)
+
+    def test_followers_1(self):
+        """
+        Dado:
+          - dois usuários cadastrados e um segue o outro
+        Quando
+          - for feita a requisição de
+            `/api/user/{user1.id}/followers/`
+        Então:
+          - o status da resposta deve ser HTTP_200_OK
+        """
+        data1 = dict(
+            username="foobar1",
+            email="foo@bar.com",
+            name="Foo1",
+            password="123",
+        )
+        data2 = dict(
+            username="foobar2",
+            email="foo@bar2.com",
+            name="Foo2",
+            password="123",
+        )
+
+        user1 = User.objects.create_user(**data1)
+        user2 = User.objects.create_user(**data2)
+
+        Follower.objects.create(following=user1, follower=user2)
+
+        data = dict(
+            username="foobar1",
+            password="123",
+        )
+
+        response = self.client.post(path="/api/token/", data=data)
+        auth = {
+            "HTTP_AUTHORIZATION": f"Bearer {response.data['access']}",
+        }
+
+        response2 = self.client.get(path=f"/api/user/{user1.id}/followers/", **auth)
+        self.assertEqual(response2.status_code, status.HTTP_200_OK, response2.data)
+
+        result_data = response2.data
+        for result in result_data["results"]:
+            self.assertIn("id", result)
+            del result["id"]
+
+        expected_data = {
+             "count": 1,
+             'next': None,
+             'previous': None,
+             'results': [{'username': 'foobar2', 'name': 'Foo2'}],
+        }
+        self.assertDictEqual(result_data, expected_data)

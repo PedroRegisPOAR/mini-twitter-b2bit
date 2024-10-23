@@ -216,3 +216,90 @@ class UserViewSetTestCase(BaseTestCase):
              'results': [{'username': 'foobar2', 'name': 'Foo2'}],
         }
         self.assertDictEqual(result_data, expected_data)
+
+    def test_follow_1(self):
+        """
+        Dado:
+          -
+        Quando
+          -
+        Então:
+          -
+        """
+        data1 = dict(
+            username="foobar1",
+            email="foo@bar.com",
+            name="Foo1",
+            password="123",
+        )
+        data2 = dict(
+            username="foobar2",
+            email="foo@bar2.com",
+            name="Foo2",
+            password="123",
+        )
+
+        user1 = User.objects.create_user(**data1)
+        user2 = User.objects.create_user(**data2)
+
+        data = dict(
+            username="foobar1",
+            password="123",
+        )
+
+        response = self.client.post(path="/api/token/", data=data)
+        auth = {
+            "HTTP_AUTHORIZATION": f"Bearer {response.data['access']}",
+        }
+
+        # response2 = self.client.get(path=f"/api/user/{user2.id}/followers/", **auth)
+        # self.assertEqual(response2.status_code, status.HTTP_200_OK, response2.data)
+
+        response3 = self.client.get(path=f"/api/user/{user2.id}/follow/", **auth)
+
+        self.assertEqual(response3.status_code, status.HTTP_204_NO_CONTENT, response3.data)
+
+    def test_unfollow_1(self):
+        """
+        Dado:
+          -
+        Quando
+          -
+        Então:
+          -
+        """
+        data1 = dict(
+            username="foobar1",
+            email="foo@bar.com",
+            name="Foo1",
+            password="123",
+        )
+        data2 = dict(
+            username="foobar2",
+            email="foo@bar2.com",
+            name="Foo2",
+            password="123",
+        )
+
+        user1 = User.objects.create_user(**data1)
+        user2 = User.objects.create_user(**data2)
+
+        Follower.objects.create(following=user2, follower=user1)
+
+        data = dict(
+            username="foobar1",
+            password="123",
+        )
+
+        response = self.client.post(path="/api/token/", data=data)
+        auth = {
+            "HTTP_AUTHORIZATION": f"Bearer {response.data['access']}",
+        }
+
+        # response2 = self.client.get(path=f"/api/user/{user2.id}/followers/", **auth)
+        # self.assertEqual(response2.status_code, status.HTTP_200_OK, response2.data)
+
+        response3 = self.client.get(path=f"/api/user/{user2.id}/unfollow/", **auth)
+
+        self.assertEqual(response3.status_code, status.HTTP_204_NO_CONTENT, response3.data)
+        self.assertEqual(Follower.objects.count(), 0)

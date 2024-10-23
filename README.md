@@ -77,7 +77,7 @@ echo 'Start docker instalation...' \
 && (getent group docker || sudo groupadd docker) \
 && sudo usermod -aG docker "$(id -nu)" \
 && sudo chown -v root:"$(id -gn)" /var/run/docker.sock \
-&& docker run -it --rm docker.io/library/alpine cat /etc/os*release  \
+&& docker run --rm docker.io/library/alpine cat /etc/os-release  \
 && docker images \
 && echo 'End docker instalation!'
 ```

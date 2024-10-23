@@ -37,8 +37,8 @@ class User(AbstractBaseUser, PermissionsMixin, BaseModel):
 
 
 class Follower(BaseModel):
-    following = models.ForeignKey(to=User, on_delete=models.PROTECT, related_name="followings")
-    follower = models.ForeignKey(to=User, on_delete=models.PROTECT, related_name="followers")
+    following = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="followings")
+    follower = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="followers")
 
     class Meta:
         unique_together = (('following', 'follower'),)

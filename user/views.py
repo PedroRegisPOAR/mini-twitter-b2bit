@@ -8,17 +8,13 @@ from drf_spectacular.utils import extend_schema
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from .models import User, Follower
+from .models import User
 from .serializers import UserSerializer, FollowerSerializer
 from .pagination import CustomPagination
 
 
-class UserAPIView(APIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
 
 class UserViewSet(ViewSet):
-    # permission_classes = [IsAuthenticated]
 
     @extend_schema(request=UserSerializer, responses={201: UserSerializer})
     def create(self, request):
@@ -26,7 +22,7 @@ class UserViewSet(ViewSet):
         serializer = UserSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
-        user = User.objects.create(**validated_data)
+        user = User.objects.create_user(**validated_data)
         serializer = UserSerializer(instance=user)
         return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 

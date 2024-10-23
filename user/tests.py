@@ -1,6 +1,7 @@
 from django.test import TestCase
 from rest_framework import status
-from .models import Follower, User
+from .models import User
+
 
 from rest_framework.test import APITestCase
 from rest_framework.authtoken.models import Token
@@ -13,17 +14,13 @@ class BaseTestCase(TestCase):
     def setUp(self):
         super().setUp()
         self.api = self.client
-        self.client = None
+        # self.client = None
 
-
-# User = get_user_model()
 
 
 class AuthTests(APITestCase):
     def setUp(self):
-        # self.superuser = User.objects.create_superuser(username='tests', password='tests')
-        self.user = User.objects.create(username='testuser', password='testpass')
-        self.token = Token.objects.get(user=self.user)
+        self.user = User.objects.create_user(username='testuser', password='testpass')
 
     def test_obtain_token(self):
         url = reverse('token_obtain_pair')
@@ -35,78 +32,81 @@ class AuthTests(APITestCase):
         self.assertEqual(1, User.objects.count())
         self.assertEqual(self.user, User.objects.get())
         self.assertEqual(url, '/api/token/')
+        self.assertTrue(self.user.is_active)
 
+        self.client.login(username='testuser', password='testpass')
+        self.client.force_login(self.user)
         self.client.force_authenticate(self.user)
         response = self.client.post('/api/token/', data, format='json')
-        print(response.data)
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('access', response.data)
         self.assertIn('refresh', response.data)
 
-    # def test_refresh_token(self):
-    #     # First, obtain a token
-    #     url = reverse('token_obtain_pair')
-    #     data = {
-    #         'username': 'testuser',
-    #         'password': 'testpass'
-    #     }
-    #     response = self.client.post(url, data, format='json')
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #     refresh = response.data['refresh']
-    #
-    #     # Now, refresh the token
-    #     refresh_url = reverse('token_refresh')
-    #     response = self.client.post(refresh_url, {'refresh': refresh}, format='json')
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
-    #     self.assertIn('access', response.data)
-    #
-    # def test_obtain_token_invalid_credentials(self):
-    #     url = reverse('token_obtain_pair')
-    #     data = {
-    #         'username': 'testuser',
-    #         'password': 'wrongpassword'
-    #     }
-    #     response = self.client.post(url, data, format='json')
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-    #
-    # def test_refresh_token_invalid(self):
-    #     url = reverse('token_refresh')
-    #     response = self.client.post(url, {'refresh': 'invalidtoken'}, format='json')
-    #     self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+    def test_refresh_token(self):
+        # First, obtain a token
+        url = reverse('token_obtain_pair')
+        data = {
+            'username': 'testuser',
+            'password': 'testpass'
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        refresh = response.data['refresh']
+
+        # Now, refresh the token
+        refresh_url = reverse('token_refresh')
+        response = self.client.post(refresh_url, {'refresh': refresh}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('access', response.data)
+
+    def test_obtain_token_invalid_credentials(self):
+        url = reverse('token_obtain_pair')
+        data = {
+            'username': 'testuser',
+            'password': 'wrongpassword'
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_refresh_token_invalid(self):
+        url = reverse('token_refresh')
+        response = self.client.post(url, {'refresh': 'invalidtoken'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
-# class UserViewSetTestCase(BaseTestCase):
-#     def test_create_1(self):
-#         """
-#         Dado:
-#           - um payload com dados válidos para cadastro de um usuário
-#         Quando:
-#           - for feita a requisição de criação de um usuário
-#             `POST /api/user/`
-#         Então:
-#           - o status da resposta deve ser HTTP_201_CREATED
-#           - id do usuário deve está na resposta
-#           - a resposta não deve conter a senha
-#           - os demais campos devem ser iguais aos dados enviados
-#         """
-#         data = dict(
-#             username="foobar",
-#             email="foo@bar.com",
-#             name="Foo",
-#             password="123",
-#         )
-#
-#         response = self.api.post(path="/api/user/", data=data)
-#
-#         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-#         self.assertIn("id", response.data)
-#
-#         result_data = response.data
-#         del result_data["id"]
-#         expect_data = data
-#         del expect_data["password"]
-#         self.assertDictEqual(result_data, expect_data)
-#
+class UserViewSetTestCase(BaseTestCase):
+    def test_create_1(self):
+        """
+        Dado:
+          - um payload com dados válidos para cadastro de um usuário
+        Quando:
+          - for feita a requisição de criação de um usuário
+            `POST /api/user/`
+        Então:
+          - o status da resposta deve ser HTTP_201_CREATED
+          - id do usuário deve está na resposta
+          - a resposta não deve conter a senha
+          - os demais campos devem ser iguais aos dados enviados
+        """
+        data = dict(
+            username="foobar",
+            email="foo@bar.com",
+            name="Foo",
+            password="123",
+        )
+
+        response = self.api.post(path="/api/user/", data=data)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        self.assertIn("id", response.data)
+
+        # result_data = response.data
+        # del result_data["id"]
+        # expect_data = data
+        # del expect_data["password"]
+        # self.assertDictEqual(result_data, expect_data)
+
 #     def test_create_2(self):
 #         """
 #         Dado:

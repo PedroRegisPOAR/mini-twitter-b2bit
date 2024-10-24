@@ -1,17 +1,8 @@
-import uuid
-
 from django.db import models
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.contrib.auth.models import AbstractBaseUser, UserManager, PermissionsMixin
 
-
-class BaseModel(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        abstract = True
+from common.models import BaseModel
 
 
 class User(AbstractBaseUser, PermissionsMixin, BaseModel):

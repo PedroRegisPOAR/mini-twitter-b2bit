@@ -54,7 +54,7 @@ class UserViewSet(ViewSet):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     @extend_schema(responses={204: FollowerSerializer})
-    @action(detail=True)
+    @action(detail=True, methods=['patch'])
     def follow(self, request, pk=None):
         try:
             to_follow = User.objects.get(pk=pk)
@@ -67,7 +67,7 @@ class UserViewSet(ViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(responses={204: FollowerSerializer})
-    @action(detail=True)
+    @action(detail=True, methods=['patch'])
     def unfollow(self, request, pk=None):
         try:
             to_follow = User.objects.get(pk=pk)

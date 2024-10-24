@@ -255,7 +255,7 @@ class UserViewSetTestCase(BaseTestCase):
         # response2 = self.client.get(path=f"/api/user/{user2.id}/followers/", **auth)
         # self.assertEqual(response2.status_code, status.HTTP_200_OK, response2.data)
 
-        response3 = self.client.get(path=f"/api/user/{user2.id}/follow/", **auth)
+        response3 = self.client.patch(path=f"/api/user/{user2.id}/follow/", **auth)
 
         self.assertEqual(response3.status_code, status.HTTP_204_NO_CONTENT, response3.data)
 
@@ -299,7 +299,7 @@ class UserViewSetTestCase(BaseTestCase):
         # response2 = self.client.get(path=f"/api/user/{user2.id}/followers/", **auth)
         # self.assertEqual(response2.status_code, status.HTTP_200_OK, response2.data)
 
-        response3 = self.client.get(path=f"/api/user/{user2.id}/unfollow/", **auth)
+        response3 = self.client.patch(path=f"/api/user/{user2.id}/unfollow/", **auth)
 
         self.assertEqual(response3.status_code, status.HTTP_204_NO_CONTENT, response3.data)
         self.assertEqual(Follower.objects.count(), 0)

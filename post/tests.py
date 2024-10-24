@@ -27,6 +27,4 @@ class PostTests(APITestCase):
         }
 
         response = self.client.post(path=f"/api/posts/", data=data_post, **auth)
-        print(response)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
-        print(response.data)

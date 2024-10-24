@@ -35,3 +35,17 @@ class PostViewSet(ViewSet):
 
         serializer = PostSerializer(instance=post)
         return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+
+# class LikeViewSet(ViewSet):
+#     permission_classes = [IsAuthenticated]
+#     @action(detail=True, methods=['patch'])
+#     def follow(self, request, pk=None):
+#         try:
+#             to_follow = User.objects.get(pk=pk)
+#         except User.DoesNotExist:
+#             return Response({'error': 'Usuário não encontrado!'}, status=status.HTTP_404_NOT_FOUND)
+#
+#         user = request.user
+#         Follower.objects.create(following=to_follow, follower=user)
+#
+#         return Response(status=status.HTTP_204_NO_CONTENT)

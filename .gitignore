@@ -8,3 +8,4 @@
 .profiles/
 .venv/
 __pycache__/
+*.jpeg

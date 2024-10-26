@@ -72,31 +72,6 @@ class PostTests(APITestCase):
         self.assertEqual(response.data["text"], data_post["text"])
         self.assertIn("/images/image_", response.data["image"], response.data)
 
-    def test_post_create_3(self):
-        """
-        Given:
-          -
-        When:
-          -
-        Then:
-          -
-        """
-
-        data_post = {
-            "text": "Hello mini twitter!",
-            "image": open("post/test_utils/image.jpeg", "rb")
-        }
-
-        self.assertEqual(Post.objects.count(), 0)
-        response = self.client.post(path=f"/api/posts/", data=data_post, format="multipart", **self.auth)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
-        self.assertEqual(Post.objects.count(), 1)
-
-        p = Post.objects.get(id=response.data["id"])
-        self.assertEqual(p.text, data_post["text"])
-        self.assertEqual(response.data["text"], data_post["text"])
-        self.assertIn("/images/image_", response.data["image"], response.data)
-
     def test_post_delete(self):
         """
         Given:

@@ -1,7 +1,9 @@
+import freezegun
 from rest_framework import status
 from user.models import User, Follower
 from post.models import Post, Like
 
+from datetime import datetime, timedelta
 
 from rest_framework.test import APITestCase
 
@@ -322,3 +324,53 @@ class FeedTests(APITestCase):
         response = self.client.get(path=f"/api/feed/", **self.auth1)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertNotEqual(response.data["results"], [], response.data)
+
+    def test_feed_cache(self):
+        """
+        Given:
+          -
+        When:
+          -
+        Then:
+          -
+        """
+        data_post1 = {
+            "text": "Some twitter..."
+        }
+
+        self.assertEqual(Post.objects.count(), 0)
+        response = self.client.post(path=f"/api/posts/", data=data_post1, **self.auth2)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        self.assertEqual(Post.objects.count(), 1)
+
+        data_post2 = {
+            "text": "Foo barr..."
+        }
+
+        response2 = self.client.post(path=f"/api/posts/", data=data_post2, **self.auth2)
+        self.assertEqual(response2.status_code, status.HTTP_201_CREATED, response2.data)
+        self.assertEqual(Post.objects.count(), 2)
+
+        response = self.client.get(path=f"/api/feed/", **self.auth1)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertNotEqual(response.data["results"], [], response.data)
+        self.assertEqual(len(response.data["results"]), 2, response.data)
+
+        data_post3 = {
+            "text": "Go go..."
+        }
+        response3 = self.client.post(path=f"/api/posts/", data=data_post3, **self.auth2)
+        self.assertEqual(response3.status_code, status.HTTP_201_CREATED, response3.data)
+        self.assertEqual(Post.objects.count(), 3)
+
+        response = self.client.get(path=f"/api/feed/", **self.auth1)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertNotEqual(response.data["results"], [], response.data)
+        self.assertEqual(len(response.data["results"]), 2, response.data)
+
+        later = datetime.now() + timedelta(minutes=2)
+        with freezegun.freeze_time(later):
+            response = self.client.get(path=f"/api/feed/", **self.auth1)
+            self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+            self.assertNotEqual(response.data["results"], [], response.data)
+            self.assertEqual(len(response.data["results"]), 3, response.data)

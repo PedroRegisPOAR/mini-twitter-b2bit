@@ -2,6 +2,8 @@ from django.shortcuts import render
 
 # Create your views here.
 
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
 from rest_framework import status
@@ -92,6 +94,7 @@ class FeedAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(responses={200: create_paginated_serializer(PostSerializer)})
+    @method_decorator(cache_page(60))
     def get(self, request):
         user = request.user
 

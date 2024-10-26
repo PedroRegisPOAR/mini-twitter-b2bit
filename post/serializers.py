@@ -8,13 +8,13 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ["id", "user_username", "user_name", "text"]
+        fields = ["id", "user_username", "user_name", "text", "image"]
 
 
 class CreatePostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields = ["text"]
+        fields = ["text", "image"]
 
 
 class CreateLikeSerializer(serializers.ModelSerializer):

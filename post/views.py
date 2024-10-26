@@ -9,8 +9,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from drf_spectacular.utils import extend_schema
 
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 from user.models import User
 from .models import Post, Like
@@ -86,6 +85,7 @@ class PostViewSet(ViewSet):
 
         return Response(status=status.HTTP_201_CREATED)
 
+# TODO:
 class LikeViewSet(ViewSet):
     permission_classes = [IsAuthenticated]
 

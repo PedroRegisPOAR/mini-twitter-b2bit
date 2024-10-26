@@ -11,9 +11,11 @@ from drf_spectacular.utils import extend_schema
 
 from rest_framework.permissions import IsAuthenticated
 
-from user.models import User
+from user.models import User, Follower
+from common.pagination import CustomPagination
+from common.serializers import create_paginated_serializer
 from .models import Post, Like
-from .serializers import CreatePostSerializer, PostSerializer, CreateLikeSerializer
+from .serializers import CreatePostSerializer, PostSerializer
 
 
 
@@ -85,19 +87,23 @@ class PostViewSet(ViewSet):
 
         return Response(status=status.HTTP_201_CREATED)
 
-# TODO:
-class LikeViewSet(ViewSet):
+
+class FeedAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(responses={201: CreateLikeSerializer})
-    def create(self, request):
-        data = request.data
+    @extend_schema(responses={200: create_paginated_serializer(PostSerializer)})
+    def get(self, request):
         user = request.user
 
-        serializer = CreateLikeSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        validated_data = serializer.validated_data
+        followings = Follower.objects.filter(follower=user).values_list("following", flat=True)
 
-        Like.objects.create(user=user, **validated_data)
+        paginator = CustomPagination()
 
-        return Response(status=status.HTTP_201_CREATED)
+        feed = Post.objects.filter(user__in=followings).order_by("-created_at")
+        page = paginator.paginate_queryset(feed, request)
+        if page is not None:
+            serializer = PostSerializer(instance=feed, many=True)
+            return paginator.get_paginated_response(serializer.data)
+
+        serializer = PostSerializer(instance=feed, many=True)
+        return Response(data=serializer.data, status=status.HTTP_201_CREATED)

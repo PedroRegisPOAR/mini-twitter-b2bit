@@ -10,7 +10,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from .models import User, Follower
 from .serializers import UserSerializer, FollowerSerializer
-from .pagination import CustomPagination
+from common.pagination import CustomPagination
 
 
 

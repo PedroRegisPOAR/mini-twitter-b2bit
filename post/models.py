@@ -11,6 +11,7 @@ class Post(BaseModel):
     # image = ImageField
     # parent = ForeignKey(null=True)
 
+
 class Like(BaseModel):
     user = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="likes")
     post = models.ForeignKey(to=Post, on_delete=models.CASCADE, related_name="likes")

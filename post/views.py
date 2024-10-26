@@ -12,8 +12,9 @@ from drf_spectacular.utils import extend_schema
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from .models import Post
-from .serializers import CreatePostSerializer, PostSerializer
+from user.models import User
+from .models import Post, Like
+from .serializers import CreatePostSerializer, PostSerializer, CreateLikeSerializer
 
 
 
@@ -36,16 +37,67 @@ class PostViewSet(ViewSet):
         serializer = PostSerializer(instance=post)
         return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
-# class LikeViewSet(ViewSet):
-#     permission_classes = [IsAuthenticated]
-#     @action(detail=True, methods=['patch'])
-#     def follow(self, request, pk=None):
-#         try:
-#             to_follow = User.objects.get(pk=pk)
-#         except User.DoesNotExist:
-#             return Response({'error': 'Usuário não encontrado!'}, status=status.HTTP_404_NOT_FOUND)
-#
-#         user = request.user
-#         Follower.objects.create(following=to_follow, follower=user)
-#
-#         return Response(status=status.HTTP_204_NO_CONTENT)
+    @extend_schema(responses={204: PostSerializer})
+    @action(detail=True, methods=['delete'])
+    def delete(self, request, pk=None):
+        try:
+            Post.objects.get(pk=pk)
+        except Post.DoesNotExist:
+            return Response({'error': 'Post não encontrado!'}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            post = Post.objects.get(pk=pk)
+            post.delete()
+        except Post.DoesNotExist:
+            pass
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @extend_schema(responses={201: PostSerializer})
+    @action(detail=True, methods=['patch'])
+    def edit(self, request, pk=None):
+        try:
+            Post.objects.get(pk=pk)
+        except Post.DoesNotExist:
+            return Response({'error': 'Post não encontrado!'}, status=status.HTTP_404_NOT_FOUND)
+
+        post = Post.objects.get(pk=pk)
+        serializer = PostSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        validated_data = serializer.validated_data
+
+        post.text = validated_data["text"]
+        post.save()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+    @extend_schema(responses={201: PostSerializer})
+    @action(detail=True, methods=['post'])
+    def like(self, request, pk=None):
+        try:
+            post = Post.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return Response({'error': 'Post não encontrado!'}, status=status.HTTP_404_NOT_FOUND)
+
+        user = request.user
+        # Actually creates the like
+        Like.objects.create(user=user, post=post)
+
+        return Response(status=status.HTTP_201_CREATED)
+
+class LikeViewSet(ViewSet):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(responses={201: CreateLikeSerializer})
+    def create(self, request):
+        data = request.data
+        user = request.user
+
+        serializer = CreateLikeSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        validated_data = serializer.validated_data
+
+        Like.objects.create(user=user, **validated_data)
+
+        return Response(status=status.HTTP_201_CREATED)

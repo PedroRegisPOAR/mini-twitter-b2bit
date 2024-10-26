@@ -4,199 +4,111 @@ from .models import User, Follower
 
 
 from rest_framework.test import APITestCase
-from rest_framework.authtoken.models import Token
-from django.contrib.auth import get_user_model
-from django.contrib.auth.models import BaseUserManager
-from django.urls import reverse
 
 
-class BaseTestCase(TestCase):
+class UserViewSetTestCase(TestCase):
     def setUp(self):
-        super().setUp()
-
-
-class AuthTests(APITestCase):
-    def setUp(self):
-        self.user = User.objects.create_user(username='testuser', password='testpass')
-
-    def test_obtain_token(self):
-        url = reverse('token_obtain_pair')
-        data = {
-            'username': 'testuser',
-            'password': 'testpass'
-        }
-
-        self.assertEqual(1, User.objects.count())
-        self.assertEqual(self.user, User.objects.get())
-        self.assertEqual(url, '/api/token/')
-        self.assertTrue(self.user.is_active)
-
-        self.client.login(username='testuser', password='testpass')
-        self.client.force_login(self.user)
-        self.client.force_authenticate(self.user)
-        response = self.client.post('/api/token/', data, format='json')
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('access', response.data)
-        self.assertIn('refresh', response.data)
-
-    def test_refresh_token(self):
-        # First, obtain a token
-        url = reverse('token_obtain_pair')
-        data = {
-            'username': 'testuser',
-            'password': 'testpass'
-        }
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        refresh = response.data['refresh']
-
-        # Now, refresh the token
-        refresh_url = reverse('token_refresh')
-        response = self.client.post(refresh_url, {'refresh': refresh}, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('access', response.data)
-
-    def test_obtain_token_invalid_credentials(self):
-        url = reverse('token_obtain_pair')
-        data = {
-            'username': 'testuser',
-            'password': 'wrongpassword'
-        }
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-    def test_refresh_token_invalid(self):
-        url = reverse('token_refresh')
-        response = self.client.post(url, {'refresh': 'invalidtoken'}, format='json')
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-
-class UserViewSetTestCase(BaseTestCase):
-    def test_create_1(self):
-        """
-        Dado:
-          - um payload com dados válidos para cadastro de um usuário
-        Quando:
-          - for feita a requisição de criação de um usuário
-            `POST /api/user/`
-        Então:
-          - o status da resposta deve ser HTTP_201_CREATED
-          - id do usuário deve está na resposta
-          - a resposta não deve conter a senha
-          - os demais campos devem ser iguais aos dados enviados
-        """
-        data = dict(
+        self.user_data_for_login = dict(
             username="foobar",
-            email="foo@bar.com",
-            name="Foo",
             password="123",
         )
-
-        response = self.client.post(path="/api/user/", data=data)
-
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
-        self.assertIn("id", response.data)
-
-        # result_data = response.data
-        # del result_data["id"]
-        # expect_data = data
-        # del expect_data["password"]
-        # self.assertDictEqual(result_data, expect_data)
-
-#     def test_create_2(self):
-#         """
-#         Dado:
-#           - um payload com username inválido para cadastro de um usuário
-#         Quando:
-#           - for feita a requisição de criação de um usuário
-#             `POST /api/user/`
-#         Então:
-#           - o status da resposta deve ser HTTP_400_BAD_REQUEST
-#         """
-#         # TODO: why the UnicodeUsernameValidator is not working? If username=" Foo  Barr" it is not failing
-#         data = dict(
-#             username="",
-#             email="foo@bar.com",
-#             name="Foo",
-#             password="1",
-#         )
-#
-#         response = self.api.post(path="/api/user/", data=data)
-#         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-#
-#     def test_create_3(self):
-#         """
-#         Dado:
-#           - um payload sem email para cadastro de um usuário
-#         Quando:
-#           - for feita a requisição de criação de um usuário
-#             `POST /api/user/`
-#         Então:
-#           - o status da resposta deve ser HTTP_400_BAD_REQUEST
-#         """
-#         data = dict(
-#             username="foobar",
-#             name="Foo",
-#             password="1",
-#         )
-#
-#         response = self.api.post(path="/api/user/", data=data)
-#         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-#
-#     def test_create_4(self):
-#         """
-#         Dado:
-#           - um payload sem password para cadastro de um usuário
-#         Quando:
-#           - for feita a requisição de criação de um usuário
-#             `POST /api/user/`
-#         Então:
-#           - o status da resposta deve ser HTTP_400_BAD_REQUEST
-#         """
-#         data = dict(
-#             username="foobar",
-#             name="Foo",
-#             email="foo@bar.com",
-#         )
-#
-#         response = self.api.post(path="/api/user/", data=data)
-#         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_followers_1(self):
-        """
-        Dado:
-          - dois usuários cadastrados e um segue o outro
-        Quando
-          - for feita a requisição de
-            `/api/user/{user1.id}/followers/`
-        Então:
-          - o status da resposta deve ser HTTP_200_OK
-        """
-        data1 = dict(
-            username="foobar1",
+        self.data1 = dict(
             email="foo@bar.com",
-            name="Foo1",
-            password="123",
-        )
-        data2 = dict(
+            name="Foo Bar",
+            **self.user_data_for_login)
+
+        self.data2 = dict(
             username="foobar2",
             email="foo@bar2.com",
             name="Foo2",
-            password="123",
+            password="5678",
         )
 
-        user1 = User.objects.create_user(**data1)
-        user2 = User.objects.create_user(**data2)
+    def test_create_1(self):
+        """
+        Given:
+          - a payload with valid data to create one user
+          - does not exist users in database
+        When:
+          - the request for create user is done `POST /api/user/`
+        Then:
+          - the status code returned must be HTTP_201_CREATED
+          - there must be one user in database
+          - the user id must be in the response
+          - the password must not be in the response
+          - the other fields in the response must be equal to the ones sent
+        """
+        self.assertEqual(User.objects.count(), 0)
+
+        response = self.client.post(path="/api/user/", data=self.data1)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+
+        self.assertEqual(User.objects.count(), 1)
+        self.assertIn("id", response.data)
+
+        result_data = response.data
+        del result_data["id"]
+        del result_data["password"]
+        expect_data = self.data1
+        del expect_data["password"]
+        self.assertDictEqual(result_data, expect_data)
+
+    def test_create_2(self):
+        """
+        Given:
+          - a payload with invalid data to create one user,
+            in this case any field that is sent to API as empt or as space.
+        When:
+          - the request for create user is done `POST /api/user/`
+        Then:
+          - the status code returned must be HTTP_400_BAD_REQUEST
+        """
+        for key in self.data1.keys():
+            data = self.data1
+
+            data[key] = ""
+            response = self.client.post(path="/api/user/", data=data)
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+            data[key] = " "
+            response = self.client.post(path="/api/user/", data=data)
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_3(self):
+        """
+        Given:
+          - a payload with invalid data to create one user,
+            in this case any field missing.
+        When:
+          - the request for create user is done `POST /api/user/`
+        Then:
+          - the status code returned must be HTTP_400_BAD_REQUEST
+        """
+        for key in self.data1.keys():
+            data = dict(self.data1)
+
+            del data[key]
+            response = self.client.post(path="/api/user/", data=data)
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_followers_1(self):
+        """
+        Given:
+          - given two users user1 and user2 and that user2 follows user1
+        When:
+          - the request for `/api/user/{user1.id}/followers/`
+        Then:
+          - the status code returned must be HTTP_200_OK
+          - the user id must be in the response
+          - the other fields in the response must be equal to the ones sent
+        """
+        user1 = User.objects.create_user(**self.data1)
+        user2 = User.objects.create_user(**self.data2)
 
         Follower.objects.create(following=user1, follower=user2)
 
-        data = dict(
-            username="foobar1",
-            password="123",
-        )
-
-        response = self.client.post(path="/api/token/", data=data)
+        response = self.client.post(path="/api/token/", data=self.user_data_for_login)
         auth = {
             "HTTP_AUTHORIZATION": f"Bearer {response.data['access']}",
         }
@@ -219,87 +131,169 @@ class UserViewSetTestCase(BaseTestCase):
 
     def test_follow_1(self):
         """
-        Dado:
-          -
-        Quando
-          -
-        Então:
-          -
+        Given:
+          - given two users user1 and user2
+          - does not exist Follower in database
+        When:
+          - the request for `/api/user/{user2.id}/follow/
+        Then:
+          - the status code returned must be HTTP_200_OK
         """
-        data1 = dict(
-            username="foobar1",
-            email="foo@bar.com",
-            name="Foo1",
-            password="123",
-        )
-        data2 = dict(
-            username="foobar2",
-            email="foo@bar2.com",
-            name="Foo2",
-            password="123",
-        )
+        user1 = User.objects.create_user(**self.data1)
+        user2 = User.objects.create_user(**self.data2)
 
-        user1 = User.objects.create_user(**data1)
-        user2 = User.objects.create_user(**data2)
-
-        data = dict(
-            username="foobar1",
-            password="123",
-        )
-
-        response = self.client.post(path="/api/token/", data=data)
+        response_auth = self.client.post(path="/api/token/", data=self.user_data_for_login)
         auth = {
-            "HTTP_AUTHORIZATION": f"Bearer {response.data['access']}",
+            "HTTP_AUTHORIZATION": f"Bearer {response_auth.data['access']}",
         }
 
-        # response2 = self.client.get(path=f"/api/user/{user2.id}/followers/", **auth)
-        # self.assertEqual(response2.status_code, status.HTTP_200_OK, response2.data)
+        response2 = self.client.get(path=f"/api/user/{user2.id}/followers/", **auth)
+        self.assertEqual(response2.status_code, status.HTTP_200_OK, response2.data)
 
-        response3 = self.client.patch(path=f"/api/user/{user2.id}/follow/", **auth)
+        self.assertEqual(Follower.objects.count(), 0)
+        response_follow = self.client.patch(path=f"/api/user/{user2.id}/follow/", **auth)
 
-        self.assertEqual(response3.status_code, status.HTTP_204_NO_CONTENT, response3.data)
+        self.assertEqual(response_follow.status_code, status.HTTP_204_NO_CONTENT, response_follow.data)
+        self.assertEqual(Follower.objects.count(), 1)
+
+        self.assertEqual(Follower.objects.filter(follower=user2).count(), 0)
+        self.assertEqual(Follower.objects.filter(following=user1).count(), 0)
+
+        self.assertEqual(Follower.objects.filter(follower=user1).count(), 1)
+        self.assertEqual(Follower.objects.filter(following=user2).count(), 1)
+
+        f1 = Follower.objects.get(follower=user1)
+        f2 = Follower.objects.get(following=user2)
+
+        self.assertEqual(f1.following, user2)
+        self.assertEqual(f1.follower, user1)
+
+        self.assertEqual(f2.following, user2)
+        self.assertEqual(f2.follower, user1)
 
     def test_unfollow_1(self):
         """
-        Dado:
-          -
-        Quando
-          -
-        Então:
-          -
+        Given:
+          - given two users user1 and user2 and that user2 follows user1
+          - exists the Follower entry from user1 and user2
+        When:
+          - the request for `PATCH /api/user/{user2.id}/unfollow/`
+        Then:
+          - the status code returned must be HTTP_204_NO_CONTENT
+          - does not exist Follower entry in database
         """
-        data1 = dict(
-            username="foobar1",
-            email="foo@bar.com",
-            name="Foo1",
-            password="123",
-        )
-        data2 = dict(
-            username="foobar2",
-            email="foo@bar2.com",
-            name="Foo2",
-            password="123",
-        )
-
-        user1 = User.objects.create_user(**data1)
-        user2 = User.objects.create_user(**data2)
+        user1 = User.objects.create_user(**self.data1)
+        user2 = User.objects.create_user(**self.data2)
 
         Follower.objects.create(following=user2, follower=user1)
+        self.assertEqual(Follower.objects.count(), 1)
 
-        data = dict(
-            username="foobar1",
-            password="123",
-        )
-
-        response = self.client.post(path="/api/token/", data=data)
+        response = self.client.post(path="/api/token/", data=self.user_data_for_login)
         auth = {
             "HTTP_AUTHORIZATION": f"Bearer {response.data['access']}",
         }
 
-        # response2 = self.client.get(path=f"/api/user/{user2.id}/followers/", **auth)
-        # self.assertEqual(response2.status_code, status.HTTP_200_OK, response2.data)
+        response2 = self.client.get(path=f"/api/user/{user2.id}/followers/", **auth)
+        self.assertEqual(response2.status_code, status.HTTP_200_OK, response2.data)
+
+        self.assertEqual(response2.data["results"][0]["username"], user1.username)
 
         response3 = self.client.patch(path=f"/api/user/{user2.id}/unfollow/", **auth)
 
         self.assertEqual(response3.status_code, status.HTTP_204_NO_CONTENT, response3.data)
         self.assertEqual(Follower.objects.count(), 0)
+
+
+class AuthTests(APITestCase):
+    def setUp(self):
+        """
+        Pre seeds data for tests and creates one user
+        """
+        self.user_data_for_login = dict(
+            username="testuser",
+            password="testpass123",
+        )
+        self.data = dict(
+            email="foo@bar.com",
+            name="Foo Bar",
+            **self.user_data_for_login)
+        self.user = User.objects.create_user(**self.data)
+
+    def test_obtain_token(self):
+        """
+        Given:
+          - given one user
+          - the user login data
+        When:
+          - the request for `POST /api/token/` is done
+        Then:
+          - the status code returned must be HTTP_200_OK
+          - the user access must be in the response
+          - the user refresh must be in the response
+        """
+        self.assertEqual(1, User.objects.count())
+        self.assertEqual(self.user, User.objects.get())
+
+        response = self.client.post('/api/token/', self.user_data_for_login)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('access', response.data)
+        self.assertIn('refresh', response.data)
+
+    def test_refresh_token(self):
+        """
+        Given:
+          - one user
+          - the user login data
+        When:
+          - the request for `POST /api/token/` is done
+        Then:
+          - the status code returned must be HTTP_200_OK
+          - the response must have, in side data, the refresh key
+        When:
+          - the request for `POST /api/token/refresh/` is done
+        Then:
+          - the status code returned must be HTTP_200_OK
+          - the response must have, in side data, the access key
+        """
+        self.assertEqual(1, User.objects.count())
+        self.assertEqual(self.user, User.objects.get())
+
+        # First, obtain a token
+        response = self.client.post("/api/token/", self.user_data_for_login)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        refresh = response.data['refresh']
+
+        # Now, refresh the token
+        response = self.client.post("/api/token/refresh/", {'refresh': refresh})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('access', response.data)
+
+    def test_obtain_token_invalid_credentials(self):
+        """
+        Given:
+          - a valid username but a wrong password
+        When:
+          - the request for `POST /api/token/` is done
+        Then:
+          - the status code returned must be HTTP_401_UNAUTHORIZED
+        """
+        data = {
+            'username': 'testuser',
+            'password': 'wrongpassword'
+        }
+        response = self.client.post("/api/token/", data=data)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_refresh_token_invalid(self):
+        """
+        Given:
+          - a invalid refresh token
+        When:
+          - the request for `POST /api/token/refresh/` is done
+        Then:
+          - the status code returned must be HTTP_401_UNAUTHORIZED
+        """
+        data = {'refresh': 'invalidtoken'}
+        response = self.client.post("/api/token/refresh/", data=data)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

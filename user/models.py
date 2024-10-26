@@ -14,7 +14,7 @@ class User(AbstractBaseUser, PermissionsMixin, BaseModel):
     is_staff = models.BooleanField("É funcionário?", default=False)
 
     USERNAME_FIELD = "username"
-    REQUIRED_FIELDS = []
+    # REQUIRED_FIELDS = []
 
     objects = UserManager()
 

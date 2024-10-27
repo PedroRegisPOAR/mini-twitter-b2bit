@@ -69,17 +69,12 @@ class UserViewSet(ViewSet):
     @extend_schema(responses={204: FollowerSerializer})
     @action(detail=True, methods=['patch'])
     def unfollow(self, request, pk=None):
-        try:
-            to_follow = User.objects.get(pk=pk)
-        except User.DoesNotExist:
-            return Response({'error': 'Usuário não encontrado!'}, status=status.HTTP_404_NOT_FOUND)
-
         user = request.user
 
         try:
-            follower = Follower.objects.get(following=to_follow, follower=user)
-            follower.delete()
+            to_unfollow = Follower.objects.get(following__id=pk, follower=user)
+            to_unfollow.delete()
         except User.DoesNotExist:
-            pass
+            return Response({'error': 'Usuário não encontrado!'}, status=status.HTTP_404_NOT_FOUND)
 
         return Response(status=status.HTTP_204_NO_CONTENT)

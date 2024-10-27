@@ -11,6 +11,10 @@ from rest_framework.test import APITestCase
 
 class PostTests(APITestCase):
     def setUp(self):
+        """
+        Creates user data for login, stores user data for its creation, creates one user and saves this user
+        autentication credentials
+        """
         self.user_data_for_login = dict(
             username="testuser",
             password="testpass",
@@ -36,7 +40,7 @@ class PostTests(APITestCase):
           - the request for create post is done `POST /api/posts/`
         Then:
           - the status code returned must be HTTP_201_CREATED
-          - the response must have the text contente equal to the created one
+          - the response must have the text content equal to the created one
         """
         data_post = {"text": "Hello mini twitter!"}
 
@@ -52,11 +56,14 @@ class PostTests(APITestCase):
     def test_post_create_2(self):
         """
         Given:
-          -
+          - one user
+          - the data to create one post with one image
         When:
-          -
+          - the request for create post is done `POST /api/posts/` with format="multipart"
         Then:
-          -
+          - the status code returned must be HTTP_201_CREATED
+          - the response must have the text content equal to the created one
+          - the base path '/images/image_' must be in the response.data["image"] field
         """
 
         data_post = {
@@ -145,6 +152,9 @@ class PostTests(APITestCase):
 
 class LikeTests(APITestCase):
     def setUp(self):
+        """
+        Creates two user data for login, user for its creation, creates one user and saves user auth credentials
+        """
         self.user1_data_for_login = dict(
             username="testuser",
             password="testpass",
@@ -178,12 +188,18 @@ class LikeTests(APITestCase):
 
     def test_like_create_1(self):
         """
+        Note: the same user who posted it is the one who liked it.
         Given:
-          -
+          - one user autenticated
+          - one created post (a tweet)
         When:
-          -
+          - the request for create user is done `POST /api/posts/{p.id}/like/`
+            with the autenticated as user1
         Then:
           - the status code returned must be HTTP_201_CREATED
+          - exist one Like entry in database
+          - the user who liked is the user1
+          - the post atribute from the created like is the created post
         """
         data_post = {"text": "AA BB CC"}
 
@@ -205,12 +221,21 @@ class LikeTests(APITestCase):
 
     def test_like_create_2(self):
         """
+        Note: as it is implemented now, the same user can like many times the same post.
         Given:
-          -
+          - one user
+          - one created post (a tweet)
         When:
-          -
+          - the request for create user is done `POST /api/posts/{p.id}/like/`
+            with the autenticated as user1
         Then:
           - the status code returned must be HTTP_201_CREATED
+          - exist one Like entry in database
+        When:
+          - the request for create user is done `POST /api/posts/{p.id}/like/`
+        Then:
+          - the status code returned must be HTTP_201_CREATED
+          - exist two Like entries in database
         """
         data_post = {"text": "Bang!"}
 
@@ -233,11 +258,14 @@ class LikeTests(APITestCase):
     def test_like_create_3(self):
         """
         Given:
-          -
+          - one user
+          - one created post (a tweet)
         When:
-          -
+          - the request for create user is done `POST /api/posts/{p.id}/like/`
+            with the autenticated as user2
         Then:
-          -
+          - the status code returned must be HTTP_201_CREATED
+          - exist one Like entry in database
         """
         data_post = {"text": "Aeiou"}
 
@@ -260,6 +288,10 @@ class LikeTests(APITestCase):
 
 class FeedTests(APITestCase):
     def setUp(self):
+        """
+        Creates two user data for login, stores two  user data for users creation, creates two users and saves
+        the autentication credentials
+        """
         # User one
         self.user_data_for_login1 = dict(
             username="testuser",
@@ -293,16 +325,26 @@ class FeedTests(APITestCase):
             "HTTP_AUTHORIZATION": f"Bearer {self._response2.data['access']}",
         }
 
+        # Creates the Follower entry
         Follower.objects.create(following=self.user2, follower=self.user1)
 
-    def test_feed(self):
+    def test_feed_1(self):
         """
         Given:
-          -
+          - 2 tweets created by user2
+          - user2 is followed by user1
         When:
-          -
+          - the request for get feed is done `GET /api/feed/`
+            with the autenticated as user1
         Then:
-          -
+          - the status code returned must be HTTP_200_OK
+          - the results list in response.data (the feed for user1) have 2 items
+        When:
+          - the request for get feed is done `GET /api/feed/`
+            with the autenticated as user2
+        Then:
+          - the status code returned must be HTTP_200_OK
+          - the results list in response.data (the feed for user2) have 2 items
         """
         data_post1 = {
             "text": "Some twitter..."
@@ -314,7 +356,7 @@ class FeedTests(APITestCase):
         self.assertEqual(Post.objects.count(), 1)
 
         data_post2 = {
-            "text": "Foo barr..."
+            "text": "Foo bar..."
         }
 
         response = self.client.post(path=f"/api/posts/", data=data_post2, **self.auth2)
@@ -323,16 +365,72 @@ class FeedTests(APITestCase):
 
         response = self.client.get(path=f"/api/feed/", **self.auth1)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertNotEqual(response.data["results"], [], response.data)
+        self.assertEqual(len(response.data["results"]), 2, response.data)
+
+        response = self.client.get(path=f"/api/feed/", **self.auth2)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(len(response.data["results"]), 2, response.data)
+
+    def test_feed_2(self):
+        """
+        Given:
+          - 2 tweets created by user1
+          - user2 is followed by user1
+        When:
+          - the request for get feed is done `GET /api/feed/`
+            with the autenticated as user1
+        Then:
+          - the status code returned must be HTTP_200_OK
+          - the results list in response.data (the feed for user1) have 0 items
+        When:
+          - the request for get feed is done `GET /api/feed/`
+            with the autenticated as user2
+        Then:
+          - the status code returned must be HTTP_200_OK
+          - the results list in response.data (the feed for user2) have 0 items
+        """
+        data_post1 = {
+            "text": "Some twitter..."
+        }
+
+        self.assertEqual(Post.objects.count(), 0)
+        response = self.client.post(path=f"/api/posts/", data=data_post1, **self.auth1)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        self.assertEqual(Post.objects.count(), 1)
+
+        data_post2 = {
+            "text": "Foo bar..."
+        }
+
+        response = self.client.post(path=f"/api/posts/", data=data_post2, **self.auth1)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        self.assertEqual(Post.objects.count(), 2)
+
+        response = self.client.get(path=f"/api/feed/", **self.auth1)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(len(response.data["results"]), 0, response.data)
+
+        response = self.client.get(path=f"/api/feed/", **self.auth2)
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(len(response.data["results"]), 0, response.data)
 
     def test_feed_cache(self):
         """
         Given:
-          -
+          - 2 tweets created by user1
+          - user2 is followed by user1
         When:
-          -
+          - the request for get feed is done `GET /api/feed/`
+            with the autenticated as user1
         Then:
-          -
+          - the status code returned must be HTTP_200_OK
+          - the results list in response.data (the feed for user1) have 2 items
+        When:
+          - has been passed 2 minutes (the cache time is 1minute)
+          - the request for create user is done `GET /api/feed/`
+        Then:
+          - the status code returned must be HTTP_200_OK
+          - the results list in response.data (the feed for user1) have 3 items
         """
         data_post1 = {
             "text": "Some twitter..."
@@ -353,7 +451,6 @@ class FeedTests(APITestCase):
 
         response = self.client.get(path=f"/api/feed/", **self.auth1)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertNotEqual(response.data["results"], [], response.data)
         self.assertEqual(len(response.data["results"]), 2, response.data)
 
         data_post3 = {
@@ -365,12 +462,10 @@ class FeedTests(APITestCase):
 
         response = self.client.get(path=f"/api/feed/", **self.auth1)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertNotEqual(response.data["results"], [], response.data)
         self.assertEqual(len(response.data["results"]), 2, response.data)
 
         later = datetime.now() + timedelta(minutes=2)
         with freezegun.freeze_time(later):
             response = self.client.get(path=f"/api/feed/", **self.auth1)
             self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-            self.assertNotEqual(response.data["results"], [], response.data)
             self.assertEqual(len(response.data["results"]), 3, response.data)

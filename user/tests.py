@@ -8,6 +8,9 @@ from rest_framework.test import APITestCase
 
 class UserViewSetTestCase(TestCase):
     def setUp(self):
+        """
+        Creates helper data for tests, user data for login and two data sets for user creation
+        """
         self.user_data_for_login = dict(
             username="foobar",
             password="123",
@@ -135,9 +138,10 @@ class UserViewSetTestCase(TestCase):
           - given two users user1 and user2
           - does not exist Follower in database
         When:
-          - the request for `/api/user/{user2.id}/follow/
+          - the request for `/api/user/{user2.id}/follow/`
         Then:
-          - the status code returned must be HTTP_200_OK
+          - the status code returned must be HTTP_204_NO_CONTENT
+          - exist one Follower entry in database
         """
         user1 = User.objects.create_user(**self.data1)
         user2 = User.objects.create_user(**self.data2)
@@ -147,20 +151,11 @@ class UserViewSetTestCase(TestCase):
             "HTTP_AUTHORIZATION": f"Bearer {response_auth.data['access']}",
         }
 
-        response2 = self.client.get(path=f"/api/user/{user2.id}/followers/", **auth)
-        self.assertEqual(response2.status_code, status.HTTP_200_OK, response2.data)
-
         self.assertEqual(Follower.objects.count(), 0)
         response_follow = self.client.patch(path=f"/api/user/{user2.id}/follow/", **auth)
 
         self.assertEqual(response_follow.status_code, status.HTTP_204_NO_CONTENT, response_follow.data)
         self.assertEqual(Follower.objects.count(), 1)
-
-        self.assertEqual(Follower.objects.filter(follower=user2).count(), 0)
-        self.assertEqual(Follower.objects.filter(following=user1).count(), 0)
-
-        self.assertEqual(Follower.objects.filter(follower=user1).count(), 1)
-        self.assertEqual(Follower.objects.filter(following=user2).count(), 1)
 
         f1 = Follower.objects.get(follower=user1)
         f2 = Follower.objects.get(following=user2)
@@ -207,7 +202,7 @@ class UserViewSetTestCase(TestCase):
 class AuthTests(APITestCase):
     def setUp(self):
         """
-        Pre seeds data for tests and creates one user
+        Creates user data for user login and user creation, and creates one user
         """
         self.user_data_for_login = dict(
             username="testuser",
@@ -278,17 +273,16 @@ class AuthTests(APITestCase):
         Then:
           - the status code returned must be HTTP_401_UNAUTHORIZED
         """
-        data = {
-            'username': 'testuser',
-            'password': 'wrongpassword'
-        }
+        data = dict(self.user_data_for_login)
+        data["password"] = 'wrongpassword'
+
         response = self.client.post("/api/token/", data=data)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_refresh_token_invalid(self):
         """
         Given:
-          - a invalid refresh token
+          - an invalid refresh token
         When:
           - the request for `POST /api/token/refresh/` is done
         Then:

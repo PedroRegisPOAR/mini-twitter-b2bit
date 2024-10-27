@@ -20,8 +20,6 @@ from .models import Post, Like
 from .serializers import CreatePostSerializer, PostSerializer
 
 
-
-
 class PostViewSet(ViewSet):
     permission_classes = [IsAuthenticated]
 

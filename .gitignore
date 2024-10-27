@@ -1,0 +1,11 @@
+*$py.class
+*.py[cod]
+*.qcow2
+*.sqlite3
+.direnv/
+.env
+.idea/
+.profiles/
+.venv/
+__pycache__/
+*.jpeg

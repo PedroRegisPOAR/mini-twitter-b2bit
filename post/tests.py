@@ -363,6 +363,11 @@ class FeedTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         self.assertEqual(Post.objects.count(), 2)
 
+        self.assertEqual(Follower.objects.count(), 1)
+        f = Follower.objects.get(following=self.user2, follower=self.user1)
+        self.assertEqual(f.following, self.user2)
+        self.assertEqual(f.follower, self.user1)
+
         response = self.client.get(path=f"/api/feed/", **self.auth1)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data["results"]), 2, response.data)
@@ -381,13 +386,13 @@ class FeedTests(APITestCase):
             with the autenticated as user1
         Then:
           - the status code returned must be HTTP_200_OK
-          - the results list in response.data (the feed for user1) have 0 items
+          - the results list in response.data (the feed for user1) have 2 items
         When:
           - the request for get feed is done `GET /api/feed/`
             with the autenticated as user2
         Then:
           - the status code returned must be HTTP_200_OK
-          - the results list in response.data (the feed for user2) have 0 items
+          - the results list in response.data (the feed for user2) have 2 items
         """
         data_post1 = {
             "text": "Some twitter..."
@@ -406,13 +411,18 @@ class FeedTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         self.assertEqual(Post.objects.count(), 2)
 
+        self.assertEqual(Follower.objects.count(), 1)
+        f = Follower.objects.get(following=self.user2, follower=self.user1)
+        self.assertEqual(f.following, self.user2)
+        self.assertEqual(f.follower, self.user1)
+
         response = self.client.get(path=f"/api/feed/", **self.auth1)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data["results"]), 0, response.data)
+        self.assertEqual(len(response.data["results"]), 2, response.data)
 
         response = self.client.get(path=f"/api/feed/", **self.auth2)
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
-        self.assertEqual(len(response.data["results"]), 0, response.data)
+        self.assertEqual(len(response.data["results"]), 2, response.data)
 
     def test_feed_cache(self):
         """

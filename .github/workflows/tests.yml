@@ -9,7 +9,7 @@ on:
      branchs:
        - 'feature/**'
        - 'fix/**'
-       - 'refactor/**'
+       - 'adjusts/**'
 
 
 jobs:
@@ -24,4 +24,4 @@ jobs:
         run: |
           docker --version
           docker images
-          ls -alh
+          docker-compose up --detach --build 

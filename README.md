@@ -3,14 +3,16 @@ Project for Backend Python Developer Selection for b2bit
 
 
 
+## Instructions to run the project 
 
+1) Clone the project:
 ```bash
 git clone https://github.com/PedroRegisPOAR/mini-twitter-b2bit.git \
 && cd mini-twitter-b2bit \
 && git checkout dev
 ```
 
-Copy the default `.env.example` to `.env` and if you want to set any secret set it in the `.env`.
+2) Copy the default `.env.example` to `.env` and if you want to set any secret set it in the `.env`.
 ```bash
 cp -v .env.example .env
 ```
@@ -21,26 +23,11 @@ If using docker-compose:
 docker-compose up --detach --build
 ```
 
-Acessing the api, swagger or the admin page:
+Acessing the API, swagger or the admin page:
 - http://localhost:8000/api
 - http://localhost:8000/api/swagger
 - http://localhost:8000/admin
 
-
-Extra, checking api logs:
-```bash
-docker-compose logs --follow apidrf 
-```
-
-Extra, checking database logs:
-```bash
-docker-compose logs --follow db 
-```
-
-Running the unit tests:
-```bash
-docker-compose exec apidrf python manage.py test
-```
 
 
 If running with your local python:
@@ -55,15 +42,23 @@ python manage.py migrate \
 && python manage.py runserver
 ```
 
-Testing the API:
+
+### Extras
+
+Checking API logs:
 ```bash
-curl http://127.0.0.1:8000/ | grep -q 'The install worked successfully! Congratulations!'
-echo $?
+docker-compose logs --follow apidrf 
 ```
 
-Or open in browser:
+Checking database logs:
 ```bash
-firefox http://127.0.0.1:8000/ 
+docker-compose logs --follow db 
+```
+
+
+Running the tests:
+```bash
+docker-compose exec apidrf python manage.py test
 ```
 
 

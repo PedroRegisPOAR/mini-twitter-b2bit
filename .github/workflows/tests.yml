@@ -24,4 +24,4 @@ jobs:
         run: |
           docker --version
           docker images
-          ls
+          ls -alh

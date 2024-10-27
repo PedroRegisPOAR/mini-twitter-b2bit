@@ -54,7 +54,7 @@ class PostViewSet(ViewSet):
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @extend_schema(responses={201: PostSerializer})
+    @extend_schema(responses={204: PostSerializer})
     @action(detail=True, methods=['patch'])
     def edit(self, request, pk=None):
         try:
@@ -91,7 +91,7 @@ class PostViewSet(ViewSet):
 class FeedAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(responses={200: create_paginated_serializer(PostSerializer)})
+    @extend_schema(responses={201: create_paginated_serializer(PostSerializer)})
     @method_decorator(cache_page(60))
     def get(self, request):
         user = request.user

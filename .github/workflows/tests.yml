@@ -35,6 +35,13 @@ jobs:
         run: |
           black --check .
 
+      - name: Generate Report
+        run: |
+          pip install coverage==7.6.4
+          coverage run -m unittest
+      - name: Upload Coverage to Codecov
+        uses: codecov/codecov-action@v2
+
       - name: Install docker-compose
         run: |
           curl -L \

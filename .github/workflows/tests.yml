@@ -20,6 +20,16 @@ jobs:
       - name: checkout PR merge commit
         uses: actions/checkout@v4
 
+      - name: Adds python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Tests python and pip
+        run: |
+          python --version
+          pip --version
+
       - name: Install docker-compose
         run: |
           curl -L \

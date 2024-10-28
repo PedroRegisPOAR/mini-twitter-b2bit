@@ -37,7 +37,7 @@ python manage.py migrate \
 ```
 
 
-### Extras
+### Extras: testing, coverage and entity-relationship diagram
 
 
 Running the tests:
@@ -59,6 +59,8 @@ make erd
 Exemple of expected result:
 ![entity-relationship diagram](mini_twitter_models.png)
 
+
+#### logs of database and API
 
 Checking API logs:
 ```bash

@@ -36,7 +36,7 @@ jobs:
           black --check .
 
       - name: Upload Coverage to Codecov
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v4
 
       - name: Install docker-compose
         run: |

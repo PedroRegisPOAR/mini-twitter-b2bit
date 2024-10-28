@@ -29,3 +29,6 @@ coverage:
 	docker-compose exec apidrf coverage report
 	docker-compose exec apidrf coverage html
 	docker-compose exec apidrf coverage xml
+
+erd:
+	docker-compose exec apidrf python manage.py graph_models -a -o mini_twitter_models.png

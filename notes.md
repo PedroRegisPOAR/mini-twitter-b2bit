@@ -1,3 +1,56 @@
+
+### django-extensions for generate graph_models 
+
+
+```bash
+pip install django-extensions==3.2.3
+```
+
+```bash
+pip install pydot==3.0.2
+```
+
+
+```bash
+python manage.py graph_models -a -o mini_twitter_models.png
+```
+
+
+### coverage
+
+
+```bash
+pip install coverage==7.6.4
+```
+
+
+```bash
+coverage run --source='.' manage.py test
+coverage report
+coverage html
+coverage xml
+```
+Refs.:
+- https://about.codecov.io/blog/python-code-coverage-using-github-actions-and-codecov/
+- 
+
+
+### Code formating and checking with black
+
+
+```bash
+pip install black==24.10.0
+```
+
+
+```bash
+black --check .
+```
+
+```bash
+black .
+```
+
 ### swagger
 
 Choosen the `drf-spectacular` library.

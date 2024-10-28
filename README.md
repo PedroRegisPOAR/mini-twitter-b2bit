@@ -45,6 +45,26 @@ python manage.py migrate \
 
 ### Extras
 
+
+Running the tests:
+```bash
+make test
+```
+
+
+Generating coverage:
+```bash
+make coverage
+```
+
+
+```bash
+make erd
+```
+
+![entity-relationship diagram](mini_twitter_models.png)
+
+
 Checking API logs:
 ```bash
 docker-compose logs --follow apidrf 
@@ -53,12 +73,6 @@ docker-compose logs --follow apidrf
 Checking database logs:
 ```bash
 docker-compose logs --follow db 
-```
-
-
-Running the tests:
-```bash
-docker-compose exec apidrf python manage.py test
 ```
 
 

@@ -190,7 +190,7 @@ class UserViewSetTestCase(TestCase):
         Follower.objects.create(following=user2, follower=user1)
         self.assertEqual(Follower.objects.count(), 1)
 
-        response = self.client.post(path="/api/token/", data=self.user_data_for_login)
+        response = self.client.post(path='/api/token/', data=self.user_data_for_login)
         auth = {
             "HTTP_AUTHORIZATION": f"Bearer {response.data['access']}",
         }

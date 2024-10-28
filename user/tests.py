@@ -188,7 +188,7 @@ class UserViewSetTestCase(TestCase):
         user2 = User.objects.create_user(**self.data2)
 
         Follower.objects.create(following=user2, follower=user1)
-        self.assertEqual(Follower.objects.count(), 10)
+        self.assertEqual(Follower.objects.count(), 1)
 
         response = self.client.post(path="/api/token/", data=self.user_data_for_login)
         auth = {

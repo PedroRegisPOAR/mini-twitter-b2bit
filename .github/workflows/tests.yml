@@ -29,6 +29,11 @@ jobs:
         run: |
           python --version
           pip --version
+          pip install black==24.10.0
+
+      - name: Test code formating with black
+        run: |
+          black --check .
 
       - name: Install docker-compose
         run: |

@@ -3,44 +3,25 @@ Project for Backend Python Developer Selection for b2bit
 
 
 
+## Instructions to run the project 
 
+1) Clone the project:
 ```bash
 git clone https://github.com/PedroRegisPOAR/mini-twitter-b2bit.git \
 && cd mini-twitter-b2bit \
-&& git checkout dev
+&& git checkout main
 ```
 
-Copy the default `.env.example` to `.env` and if you want to set any secret set it in the `.env`.
+2) You need to have `docker`, `docker-compose` and `make` installed:
 ```bash
-cp -v .env.example .env
+make up
 ```
 
-
-If using docker-compose:
-```bash
-docker-compose up --detach --build
-```
-
-Acessing the api, swagger or the admin page:
+Acessing the API, swagger or the admin page:
 - http://localhost:8000/api
 - http://localhost:8000/api/swagger
 - http://localhost:8000/admin
 
-
-Extra, checking api logs:
-```bash
-docker-compose logs --follow apidrf 
-```
-
-Extra, checking database logs:
-```bash
-docker-compose logs --follow db 
-```
-
-Running the unit tests:
-```bash
-docker-compose exec apidrf python manage.py test
-```
 
 
 If running with your local python:
@@ -55,21 +36,47 @@ python manage.py migrate \
 && python manage.py runserver
 ```
 
-Testing the API:
+
+### Extras: testing, coverage and entity-relationship diagram
+
+
+Running the tests:
 ```bash
-curl http://127.0.0.1:8000/ | grep -q 'The install worked successfully! Congratulations!'
-echo $?
+make test
 ```
 
-Or open in browser:
+
+Generating coverage:
 ```bash
-firefox http://127.0.0.1:8000/ 
+make coverage
+```
+
+
+```bash
+make erd
+```
+
+Exemple of expected result:
+![entity-relationship diagram](mini_twitter_models.png)
+
+
+#### logs of database and API
+
+Checking API logs:
+```bash
+docker-compose logs --follow apidrf 
+```
+
+Checking database logs:
+```bash
+docker-compose logs --follow db 
 ```
 
 
 ### Installing docker and docker-compose
 
 
+Installing docker:
 ```bash
 echo 'Start docker instalation...' \
 && curl -fsSL https://get.docker.com | sudo sh \
@@ -88,6 +95,7 @@ Refs.:
 - https://superuser.com/a/609141
 
 
+Installing docker-compose:
 ```bash
 sudo curl -L \
 "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" \

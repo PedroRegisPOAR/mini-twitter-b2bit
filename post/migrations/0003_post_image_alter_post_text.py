@@ -6,18 +6,20 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('post', '0002_like'),
+        ("post", "0002_like"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='post',
-            name='image',
-            field=models.ImageField(blank=True, null=True, upload_to='images', verbose_name='Imagem do post'),
+            model_name="post",
+            name="image",
+            field=models.ImageField(
+                blank=True, null=True, upload_to="images", verbose_name="Imagem do post"
+            ),
         ),
         migrations.AlterField(
-            model_name='post',
-            name='text',
-            field=models.CharField(max_length=128, verbose_name='Conteúdo do post'),
+            model_name="post",
+            name="text",
+            field=models.CharField(max_length=128, verbose_name="Conteúdo do post"),
         ),
     ]

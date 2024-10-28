@@ -13,10 +13,9 @@ from .serializers import UserSerializer, FollowerSerializer
 from common.pagination import CustomPagination
 
 
-
 class UserViewSet(ViewSet):
     def get_permissions(self):
-        if self.action == 'create':
+        if self.action == "create":
             # Allow any user to access the create endpoint
             self.permission_classes = [AllowAny]
         else:
@@ -35,12 +34,14 @@ class UserViewSet(ViewSet):
         return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
     @extend_schema(responses={200: FollowerSerializer})
-    @action(detail=True, methods=['get'])
+    @action(detail=True, methods=["get"])
     def followers(self, request, pk=None):
         try:
             user = User.objects.get(pk=pk)
         except User.DoesNotExist:
-            return Response({'error': 'Usuário não encontrado!'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Usuário não encontrado!"}, status=status.HTTP_404_NOT_FOUND
+            )
 
         paginator = CustomPagination()
         followers = Follower.objects.filter(following=user)
@@ -54,12 +55,14 @@ class UserViewSet(ViewSet):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     @extend_schema(responses={204: FollowerSerializer})
-    @action(detail=True, methods=['patch'])
+    @action(detail=True, methods=["patch"])
     def follow(self, request, pk=None):
         try:
             to_follow = User.objects.get(pk=pk)
         except User.DoesNotExist:
-            return Response({'error': 'Usuário não encontrado!'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Usuário não encontrado!"}, status=status.HTTP_404_NOT_FOUND
+            )
 
         user = request.user
         Follower.objects.create(following=to_follow, follower=user)
@@ -67,7 +70,7 @@ class UserViewSet(ViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(responses={204: FollowerSerializer})
-    @action(detail=True, methods=['patch'])
+    @action(detail=True, methods=["patch"])
     def unfollow(self, request, pk=None):
         user = request.user
 
@@ -75,6 +78,8 @@ class UserViewSet(ViewSet):
             to_unfollow = Follower.objects.get(following__id=pk, follower=user)
             to_unfollow.delete()
         except User.DoesNotExist:
-            return Response({'error': 'Usuário não encontrado!'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Usuário não encontrado!"}, status=status.HTTP_404_NOT_FOUND
+            )
 
         return Response(status=status.HTTP_204_NO_CONTENT)

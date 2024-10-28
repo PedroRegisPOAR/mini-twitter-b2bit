@@ -13,6 +13,7 @@ WORKDIR /home/appuser
 RUN apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends --no-install-suggests -y \
     ca-certificates \
+    graphviz \
  && apt-get -y autoremove \
  && apt-get -y clean  \
  && rm -rf /var/lib/apt/lists/*
@@ -30,12 +31,14 @@ RUN addgroup appgroup \
 
 COPY requirements.txt /home/appuser
 
+ENV PIP_ROOT_USER_ACTION=ignore
 RUN python -m pip install --upgrade pip==24.2 --ignore-installed \
  && pip install --requirement requirements.txt
 
 COPY . /home/appuser
 
-USER appuser:appgroup
+# The GitHub Action gives permisison denied if the user is not root. TODO: hardening
+# USER appuser:appgroup
 
 ENTRYPOINT ["/bin/bash", "-c"]
 CMD ["python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]

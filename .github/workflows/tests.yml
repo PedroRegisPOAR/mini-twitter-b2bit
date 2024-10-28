@@ -1,15 +1,15 @@
 name: tests
 
-on: workflow_dispatch
-# on:
-#   push:
-#     branches:
-#       - main
-#   pull_request:
-#     branchs:
-#       - 'feature/**'
-#       - 'fix/**'
-#       - 'refactor/**'
+# on: workflow_dispatch
+on:
+   push:
+     branches:
+       - main
+   pull_request:
+     branchs:
+       - 'feature/**'
+       - 'fix/**'
+       - 'adjusts/**'
 
 
 jobs:
@@ -20,8 +20,40 @@ jobs:
       - name: checkout PR merge commit
         uses: actions/checkout@v4
 
-      - name: Test docker
+      - name: Adds python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Tests python and pip
+        run: |
+          python --version
+          pip --version
+          pip install black==24.10.0
+
+      - name: Upload Coverage to Codecov
+        uses: codecov/codecov-action@v4
+
+      - name: Install docker-compose
+        run: |
+          curl -L \
+          "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" \
+          -o /usr/local/bin/docker-compose \
+          && sudo chmod +x /usr/local/bin/docker-compose \
+          && docker-compose --version
+
+      - name: Build OCI Image and run tests
         run: |
           docker --version
-          docker images
-          ls
+          make env.default
+          make build
+          make up
+          make test
+
+      - name: Test code formating with black
+        run: |
+          make fmt.check
+
+      - name: Generate Report
+        run: |
+          make coverage

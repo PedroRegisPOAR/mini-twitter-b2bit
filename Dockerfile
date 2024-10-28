@@ -26,7 +26,6 @@ RUN addgroup appgroup \
     --gecos "User" appuser \
     --ingroup appgroup \
  && chmod 0700 /home/appuser \
- && mkdir /home/appuser/images \
  && chown --recursive appuser:appgroup /home/appuser
 
 COPY requirements.txt /home/appuser
@@ -36,7 +35,7 @@ RUN python -m pip install --upgrade pip==24.2 --ignore-installed \
 
 COPY . /home/appuser
 
-USER appuser:appgroup
+# USER appuser:appgroup
 
 ENTRYPOINT ["/bin/bash", "-c"]
 CMD ["python manage.py migrate && python manage.py runserver 0.0.0.0:8000"]

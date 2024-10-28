@@ -42,15 +42,12 @@ jobs:
           && sudo chmod +x /usr/local/bin/docker-compose \
           && docker-compose --version
 
-      - name: Test docker
+      - name: Build OCI Image and run tests
         run: |
           docker --version
-          docker images
           make env.default
-          docker-compose down --volumes \
-          && docker-compose up --detach --build \
-          && docker-compose exec apidrf python manage.py test
-          docker images
+          make build
+          make test
 
       - name: Test code formating with black
         run: |

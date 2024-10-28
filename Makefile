@@ -7,6 +7,7 @@ env.default:
 	test -f .env || cp -v .env.example .env
 
 up:
+	make env.default
 	docker-compose up --detach --build
 
 down:

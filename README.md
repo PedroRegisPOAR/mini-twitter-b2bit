@@ -9,18 +9,12 @@ Project for Backend Python Developer Selection for b2bit
 ```bash
 git clone https://github.com/PedroRegisPOAR/mini-twitter-b2bit.git \
 && cd mini-twitter-b2bit \
-&& git checkout dev
+&& git checkout main
 ```
 
-2) Copy the default `.env.example` to `.env` and if you want to set any secret set it in the `.env`.
+2) You need to have `docker`, `docker-compose` and `make` installed:
 ```bash
-cp -v .env.example .env
-```
-
-
-If using docker-compose:
-```bash
-docker-compose up --detach --build
+make up
 ```
 
 Acessing the API, swagger or the admin page:
@@ -62,6 +56,7 @@ make coverage
 make erd
 ```
 
+Exemple of expected result:
 ![entity-relationship diagram](mini_twitter_models.png)
 
 
@@ -79,6 +74,7 @@ docker-compose logs --follow db
 ### Installing docker and docker-compose
 
 
+Installing docker:
 ```bash
 echo 'Start docker instalation...' \
 && curl -fsSL https://get.docker.com | sudo sh \
@@ -97,6 +93,7 @@ Refs.:
 - https://superuser.com/a/609141
 
 
+Installing docker-compose:
 ```bash
 sudo curl -L \
 "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" \

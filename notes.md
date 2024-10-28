@@ -1,3 +1,7 @@
+## Some draft notes
+
+
+While doing the project I was taking notes about many steeps. Here are some of them.
 
 ### django-extensions for generate graph_models 
 

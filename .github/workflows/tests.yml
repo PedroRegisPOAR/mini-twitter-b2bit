@@ -35,5 +35,6 @@ jobs:
           cp -v .env.example .env
           docker-compose down --volumes \
           && docker-compose up --detach --build \
+          && ls -alh \
           && docker-compose exec apidrf python manage.py test
           docker images

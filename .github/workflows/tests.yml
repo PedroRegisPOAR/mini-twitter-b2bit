@@ -31,10 +31,6 @@ jobs:
           pip --version
           pip install black==24.10.0
 
-      - name: Test code formating with black
-        run: |
-          black --check .
-
       - name: Upload Coverage to Codecov
         uses: codecov/codecov-action@v4
 
@@ -50,15 +46,16 @@ jobs:
         run: |
           docker --version
           docker images
-          cp -v .env.example .env
+          make env.default
           docker-compose down --volumes \
           && docker-compose up --detach --build \
           && docker-compose exec apidrf python manage.py test
           docker images
 
+      - name: Test code formating with black
+        run: |
+          make fmt.check
+
       - name: Generate Report
         run: |
-          docker-compose exec apidrf coverage run --source='.' manage.py test
-          docker-compose exec apidrf coverage report
-          docker-compose exec apidrf coverage html
-          docker-compose exec apidrf coverage xml
+          make coverage

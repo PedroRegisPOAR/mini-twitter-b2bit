@@ -39,12 +39,14 @@ class PostViewSet(ViewSet):
         return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
     @extend_schema(responses={204: PostSerializer})
-    @action(detail=True, methods=['delete'])
+    @action(detail=True, methods=["delete"])
     def delete(self, request, pk=None):
         try:
             Post.objects.get(pk=pk)
         except Post.DoesNotExist:
-            return Response({'error': 'Post não encontrado!'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Post não encontrado!"}, status=status.HTTP_404_NOT_FOUND
+            )
 
         try:
             post = Post.objects.get(pk=pk)
@@ -55,12 +57,14 @@ class PostViewSet(ViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(responses={204: PostSerializer})
-    @action(detail=True, methods=['patch'])
+    @action(detail=True, methods=["patch"])
     def edit(self, request, pk=None):
         try:
             Post.objects.get(pk=pk)
         except Post.DoesNotExist:
-            return Response({'error': 'Post não encontrado!'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Post não encontrado!"}, status=status.HTTP_404_NOT_FOUND
+            )
 
         post = Post.objects.get(pk=pk)
         serializer = PostSerializer(data=request.data)
@@ -72,14 +76,15 @@ class PostViewSet(ViewSet):
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
     @extend_schema(responses={201: PostSerializer})
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=["post"])
     def like(self, request, pk=None):
         try:
             post = Post.objects.get(pk=pk)
         except User.DoesNotExist:
-            return Response({'error': 'Post não encontrado!'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Post não encontrado!"}, status=status.HTTP_404_NOT_FOUND
+            )
 
         user = request.user
         # Actually creates the like
@@ -96,7 +101,9 @@ class FeedAPIView(APIView):
     def get(self, request):
         user = request.user
 
-        followings = Follower.objects.filter(follower=user).values_list("following", flat=True)
+        followings = Follower.objects.filter(follower=user).values_list(
+            "following", flat=True
+        )
 
         paginator = CustomPagination()
 

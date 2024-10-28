@@ -16,9 +16,8 @@ class UserViewSetTestCase(TestCase):
             password="123",
         )
         self.data1 = dict(
-            email="foo@bar.com",
-            name="Foo Bar",
-            **self.user_data_for_login)
+            email="foo@bar.com", name="Foo Bar", **self.user_data_for_login
+        )
 
         self.data2 = dict(
             username="foobar2",
@@ -125,10 +124,10 @@ class UserViewSetTestCase(TestCase):
             del result["id"]
 
         expected_data = {
-             "count": 1,
-             'next': None,
-             'previous': None,
-             'results': [{'username': 'foobar2', 'name': 'Foo2'}],
+            "count": 1,
+            "next": None,
+            "previous": None,
+            "results": [{"username": "foobar2", "name": "Foo2"}],
         }
         self.assertDictEqual(result_data, expected_data)
 
@@ -146,15 +145,23 @@ class UserViewSetTestCase(TestCase):
         user1 = User.objects.create_user(**self.data1)
         user2 = User.objects.create_user(**self.data2)
 
-        response_auth = self.client.post(path="/api/token/", data=self.user_data_for_login)
+        response_auth = self.client.post(
+            path="/api/token/", data=self.user_data_for_login
+        )
         auth = {
             "HTTP_AUTHORIZATION": f"Bearer {response_auth.data['access']}",
         }
 
         self.assertEqual(Follower.objects.count(), 0)
-        response_follow = self.client.patch(path=f"/api/user/{user2.id}/follow/", **auth)
+        response_follow = self.client.patch(
+            path=f"/api/user/{user2.id}/follow/", **auth
+        )
 
-        self.assertEqual(response_follow.status_code, status.HTTP_204_NO_CONTENT, response_follow.data)
+        self.assertEqual(
+            response_follow.status_code,
+            status.HTTP_204_NO_CONTENT,
+            response_follow.data,
+        )
         self.assertEqual(Follower.objects.count(), 1)
 
         f1 = Follower.objects.get(follower=user1)
@@ -195,7 +202,9 @@ class UserViewSetTestCase(TestCase):
 
         response3 = self.client.patch(path=f"/api/user/{user2.id}/unfollow/", **auth)
 
-        self.assertEqual(response3.status_code, status.HTTP_204_NO_CONTENT, response3.data)
+        self.assertEqual(
+            response3.status_code, status.HTTP_204_NO_CONTENT, response3.data
+        )
         self.assertEqual(Follower.objects.count(), 0)
 
 
@@ -209,9 +218,8 @@ class AuthTests(APITestCase):
             password="testpass123",
         )
         self.data = dict(
-            email="foo@bar.com",
-            name="Foo Bar",
-            **self.user_data_for_login)
+            email="foo@bar.com", name="Foo Bar", **self.user_data_for_login
+        )
         self.user = User.objects.create_user(**self.data)
 
     def test_obtain_token(self):
@@ -229,11 +237,11 @@ class AuthTests(APITestCase):
         self.assertEqual(1, User.objects.count())
         self.assertEqual(self.user, User.objects.get())
 
-        response = self.client.post('/api/token/', self.user_data_for_login)
+        response = self.client.post("/api/token/", self.user_data_for_login)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('access', response.data)
-        self.assertIn('refresh', response.data)
+        self.assertIn("access", response.data)
+        self.assertIn("refresh", response.data)
 
     def test_refresh_token(self):
         """
@@ -257,12 +265,12 @@ class AuthTests(APITestCase):
         # First, obtain a token
         response = self.client.post("/api/token/", self.user_data_for_login)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        refresh = response.data['refresh']
+        refresh = response.data["refresh"]
 
         # Now, refresh the token
-        response = self.client.post("/api/token/refresh/", {'refresh': refresh})
+        response = self.client.post("/api/token/refresh/", {"refresh": refresh})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('access', response.data)
+        self.assertIn("access", response.data)
 
     def test_obtain_token_invalid_credentials(self):
         """
@@ -274,7 +282,7 @@ class AuthTests(APITestCase):
           - the status code returned must be HTTP_401_UNAUTHORIZED
         """
         data = dict(self.user_data_for_login)
-        data["password"] = 'wrongpassword'
+        data["password"] = "wrongpassword"
 
         response = self.client.post("/api/token/", data=data)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -288,6 +296,6 @@ class AuthTests(APITestCase):
         Then:
           - the status code returned must be HTTP_401_UNAUTHORIZED
         """
-        data = {'refresh': 'invalidtoken'}
+        data = {"refresh": "invalidtoken"}
         response = self.client.post("/api/token/refresh/", data=data)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

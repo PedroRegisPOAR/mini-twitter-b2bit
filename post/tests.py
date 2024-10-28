@@ -8,7 +8,6 @@ from datetime import datetime, timedelta
 from rest_framework.test import APITestCase
 
 
-
 class PostTests(APITestCase):
     def setUp(self):
         """
@@ -20,13 +19,14 @@ class PostTests(APITestCase):
             password="testpass",
         )
         self.data = dict(
-            email="foo@bar.com",
-            name="Foo Bar",
-            **self.user_data_for_login)
+            email="foo@bar.com", name="Foo Bar", **self.user_data_for_login
+        )
 
         self.user = User.objects.create_user(**self.data)
 
-        self._response = self.client.post(path="/api/token/", data=self.user_data_for_login)
+        self._response = self.client.post(
+            path="/api/token/", data=self.user_data_for_login
+        )
         self.auth = {
             "HTTP_AUTHORIZATION": f"Bearer {self._response.data['access']}",
         }
@@ -68,11 +68,13 @@ class PostTests(APITestCase):
 
         data_post = {
             "text": "Hello mini twitter!",
-            "image": open("post/test_utils/image.jpeg", "rb")
+            "image": open("post/test_utils/image.jpeg", "rb"),
         }
 
         self.assertEqual(Post.objects.count(), 0)
-        response = self.client.post(path=f"/api/posts/", data=data_post, format="multipart", **self.auth)
+        response = self.client.post(
+            path=f"/api/posts/", data=data_post, format="multipart", **self.auth
+        )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         self.assertEqual(Post.objects.count(), 1)
 
@@ -93,9 +95,7 @@ class PostTests(APITestCase):
           - the status code returned must be HTTP_204_NO_CONTENT
           - must not exist Post entries
         """
-        data_post = {
-            "text": "Some text. Simple twitter!"
-        }
+        data_post = {"text": "Some text. Simple twitter!"}
 
         self.assertEqual(Post.objects.count(), 0)
         response = self.client.post(path=f"/api/posts/", data=data_post, **self.auth)
@@ -124,9 +124,7 @@ class PostTests(APITestCase):
           - the status code returned must be HTTP_204_NO_CONTENT
           - the edited post must have its content equal to the data send to edit it
         """
-        data_post = {
-            "text": "Some twitter..."
-        }
+        data_post = {"text": "Some twitter..."}
 
         self.assertEqual(Post.objects.count(), 0)
         response = self.client.post(path=f"/api/posts/", data=data_post, **self.auth)
@@ -136,13 +134,15 @@ class PostTests(APITestCase):
         p = Post.objects.get(id=response.data["id"])
         self.assertEqual(p.text, data_post["text"])
 
-        edited_data_post = {
-            "text": "a b c"
-        }
+        edited_data_post = {"text": "a b c"}
 
-        response2 = self.client.patch(path=f"/api/posts/{p.id}/edit/", data=edited_data_post, **self.auth)
+        response2 = self.client.patch(
+            path=f"/api/posts/{p.id}/edit/", data=edited_data_post, **self.auth
+        )
 
-        self.assertEqual(response2.status_code, status.HTTP_204_NO_CONTENT, response2.data)
+        self.assertEqual(
+            response2.status_code, status.HTTP_204_NO_CONTENT, response2.data
+        )
         self.assertEqual(Post.objects.count(), 1)
 
         p = Post.objects.get(user=self.user)
@@ -160,13 +160,14 @@ class LikeTests(APITestCase):
             password="testpass",
         )
         self.data1 = dict(
-            email="foo@bar.com",
-            name="Foo Bar",
-            **self.user1_data_for_login)
+            email="foo@bar.com", name="Foo Bar", **self.user1_data_for_login
+        )
 
         self.user1 = User.objects.create_user(**self.data1)
 
-        self._response = self.client.post(path="/api/token/", data=self.user1_data_for_login)
+        self._response = self.client.post(
+            path="/api/token/", data=self.user1_data_for_login
+        )
         self.auth_as_user1 = {
             "HTTP_AUTHORIZATION": f"Bearer {self._response.data['access']}",
         }
@@ -176,12 +177,13 @@ class LikeTests(APITestCase):
             password="123456",
         )
         self.data2 = dict(
-            email="xyz@gmail.com",
-            name="X Y Z",
-            **self.user2_data_for_login)
+            email="xyz@gmail.com", name="X Y Z", **self.user2_data_for_login
+        )
 
         self.user2 = User.objects.create_user(**self.data2)
-        self._response2 = self.client.post(path="/api/token/", data=self.user2_data_for_login)
+        self._response2 = self.client.post(
+            path="/api/token/", data=self.user2_data_for_login
+        )
         self.auth_as_user2 = {
             "HTTP_AUTHORIZATION": f"Bearer {self._response2.data['access']}",
         }
@@ -204,14 +206,18 @@ class LikeTests(APITestCase):
         data_post = {"text": "AA BB CC"}
 
         self.assertEqual(Post.objects.count(), 0)
-        response = self.client.post(path=f"/api/posts/", data=data_post, **self.auth_as_user1)
+        response = self.client.post(
+            path=f"/api/posts/", data=data_post, **self.auth_as_user1
+        )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         self.assertEqual(Post.objects.count(), 1)
 
         p = Post.objects.get(user=self.user1)
         self.assertEqual(p.text, data_post["text"])
 
-        response2 = self.client.post(path=f"/api/posts/{p.id}/like/", **self.auth_as_user1)
+        response2 = self.client.post(
+            path=f"/api/posts/{p.id}/like/", **self.auth_as_user1
+        )
         self.assertEqual(response2.status_code, status.HTTP_201_CREATED, response2.data)
         self.assertEqual(Like.objects.count(), 1)
 
@@ -240,18 +246,24 @@ class LikeTests(APITestCase):
         data_post = {"text": "Bang!"}
 
         self.assertEqual(Post.objects.count(), 0)
-        response = self.client.post(path=f"/api/posts/", data=data_post, **self.auth_as_user1)
+        response = self.client.post(
+            path=f"/api/posts/", data=data_post, **self.auth_as_user1
+        )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         self.assertEqual(Post.objects.count(), 1)
 
         p = Post.objects.get(user=self.user1)
         self.assertEqual(p.text, data_post["text"])
 
-        response2 = self.client.post(path=f"/api/posts/{p.id}/like/", **self.auth_as_user1)
+        response2 = self.client.post(
+            path=f"/api/posts/{p.id}/like/", **self.auth_as_user1
+        )
         self.assertEqual(Like.objects.count(), 1)
         self.assertEqual(response2.status_code, status.HTTP_201_CREATED, response2.data)
 
-        response3 = self.client.post(path=f"/api/posts/{p.id}/like/", **self.auth_as_user1)
+        response3 = self.client.post(
+            path=f"/api/posts/{p.id}/like/", **self.auth_as_user1
+        )
         self.assertEqual(Like.objects.count(), 2)
         self.assertEqual(response3.status_code, status.HTTP_201_CREATED, response3.data)
 
@@ -270,14 +282,18 @@ class LikeTests(APITestCase):
         data_post = {"text": "Aeiou"}
 
         self.assertEqual(Post.objects.count(), 0)
-        response = self.client.post(path=f"/api/posts/", data=data_post, **self.auth_as_user1)
+        response = self.client.post(
+            path=f"/api/posts/", data=data_post, **self.auth_as_user1
+        )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         self.assertEqual(Post.objects.count(), 1)
 
         p = Post.objects.get(user=self.user1)
         self.assertEqual(p.text, data_post["text"])
 
-        response2 = self.client.post(path=f"/api/posts/{p.id}/like/", **self.auth_as_user2)
+        response2 = self.client.post(
+            path=f"/api/posts/{p.id}/like/", **self.auth_as_user2
+        )
         self.assertEqual(response2.status_code, status.HTTP_201_CREATED, response2.data)
         self.assertEqual(Like.objects.count(), 1)
 
@@ -298,13 +314,14 @@ class FeedTests(APITestCase):
             password="testpass",
         )
         self.data1 = dict(
-            email="foo@bar.com",
-            name="Foo Bar",
-            **self.user_data_for_login1)
+            email="foo@bar.com", name="Foo Bar", **self.user_data_for_login1
+        )
 
         self.user1 = User.objects.create_user(**self.data1)
 
-        self._response1 = self.client.post(path="/api/token/", data=self.user_data_for_login1)
+        self._response1 = self.client.post(
+            path="/api/token/", data=self.user_data_for_login1
+        )
         self.auth1 = {
             "HTTP_AUTHORIZATION": f"Bearer {self._response1.data['access']}",
         }
@@ -315,12 +332,13 @@ class FeedTests(APITestCase):
             password="testpass",
         )
         self.data2 = dict(
-            email="foo2@bar.com",
-            name="Foo Bar",
-            **self.user_data_for_login2)
+            email="foo2@bar.com", name="Foo Bar", **self.user_data_for_login2
+        )
 
         self.user2 = User.objects.create_user(**self.data2)
-        self._response2 = self.client.post(path="/api/token/", data=self.user_data_for_login2)
+        self._response2 = self.client.post(
+            path="/api/token/", data=self.user_data_for_login2
+        )
         self.auth2 = {
             "HTTP_AUTHORIZATION": f"Bearer {self._response2.data['access']}",
         }
@@ -346,18 +364,14 @@ class FeedTests(APITestCase):
           - the status code returned must be HTTP_200_OK
           - the results list in response.data (the feed for user2) have 2 items
         """
-        data_post1 = {
-            "text": "Some twitter..."
-        }
+        data_post1 = {"text": "Some twitter..."}
 
         self.assertEqual(Post.objects.count(), 0)
         response = self.client.post(path=f"/api/posts/", data=data_post1, **self.auth2)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         self.assertEqual(Post.objects.count(), 1)
 
-        data_post2 = {
-            "text": "Foo bar..."
-        }
+        data_post2 = {"text": "Foo bar..."}
 
         response = self.client.post(path=f"/api/posts/", data=data_post2, **self.auth2)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
@@ -394,18 +408,14 @@ class FeedTests(APITestCase):
           - the status code returned must be HTTP_200_OK
           - the results list in response.data (the feed for user2) have 2 items
         """
-        data_post1 = {
-            "text": "Some twitter..."
-        }
+        data_post1 = {"text": "Some twitter..."}
 
         self.assertEqual(Post.objects.count(), 0)
         response = self.client.post(path=f"/api/posts/", data=data_post1, **self.auth1)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         self.assertEqual(Post.objects.count(), 1)
 
-        data_post2 = {
-            "text": "Foo bar..."
-        }
+        data_post2 = {"text": "Foo bar..."}
 
         response = self.client.post(path=f"/api/posts/", data=data_post2, **self.auth1)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
@@ -442,18 +452,14 @@ class FeedTests(APITestCase):
           - the status code returned must be HTTP_200_OK
           - the results list in response.data (the feed for user1) have 3 items
         """
-        data_post1 = {
-            "text": "Some twitter..."
-        }
+        data_post1 = {"text": "Some twitter..."}
 
         self.assertEqual(Post.objects.count(), 0)
         response = self.client.post(path=f"/api/posts/", data=data_post1, **self.auth2)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
         self.assertEqual(Post.objects.count(), 1)
 
-        data_post2 = {
-            "text": "Foo barr..."
-        }
+        data_post2 = {"text": "Foo barr..."}
 
         response2 = self.client.post(path=f"/api/posts/", data=data_post2, **self.auth2)
         self.assertEqual(response2.status_code, status.HTTP_201_CREATED, response2.data)
@@ -463,9 +469,7 @@ class FeedTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(len(response.data["results"]), 2, response.data)
 
-        data_post3 = {
-            "text": "Go go..."
-        }
+        data_post3 = {"text": "Go go..."}
         response3 = self.client.post(path=f"/api/posts/", data=data_post3, **self.auth2)
         self.assertEqual(response3.status_code, status.HTTP_201_CREATED, response3.data)
         self.assertEqual(Post.objects.count(), 3)

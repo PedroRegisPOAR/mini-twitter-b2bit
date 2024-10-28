@@ -6,7 +6,12 @@ from common.models import BaseModel
 
 
 class User(AbstractBaseUser, PermissionsMixin, BaseModel):
-    username = models.CharField(verbose_name="username", max_length=20, unique=True, validators=[UnicodeUsernameValidator])
+    username = models.CharField(
+        verbose_name="username",
+        max_length=20,
+        unique=True,
+        validators=[UnicodeUsernameValidator],
+    )
     email = models.EmailField(verbose_name="endereço de email", unique=True)
     name = models.CharField(verbose_name="nome do usuário", max_length=200)
     password = models.CharField(verbose_name="senha do usuário", max_length=150)
@@ -28,11 +33,15 @@ class User(AbstractBaseUser, PermissionsMixin, BaseModel):
 
 
 class Follower(BaseModel):
-    following = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="followings")
-    follower = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="followers")
+    following = models.ForeignKey(
+        to=User, on_delete=models.CASCADE, related_name="followings"
+    )
+    follower = models.ForeignKey(
+        to=User, on_delete=models.CASCADE, related_name="followers"
+    )
 
     class Meta:
-        unique_together = (('following', 'follower'),)
+        unique_together = (("following", "follower"),)
         ordering = ["-created_at"]
         verbose_name = "Seguidor"
         verbose_name_plural = "Seguidores"

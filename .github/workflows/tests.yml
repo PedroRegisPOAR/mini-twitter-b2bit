@@ -20,7 +20,7 @@ jobs:
       - name: checkout PR merge commit
         uses: actions/checkout@v4
 
-      - name: Isntall docker-compose
+      - name: Install docker-compose
         run: |
           curl -L \
           "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" \

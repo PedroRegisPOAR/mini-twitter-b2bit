@@ -47,6 +47,7 @@ jobs:
           docker --version
           make env.default
           make build
+          make up
           make test
 
       - name: Test code formating with black

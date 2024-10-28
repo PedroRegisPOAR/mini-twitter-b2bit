@@ -35,6 +35,7 @@ RUN python -m pip install --upgrade pip==24.2 --ignore-installed \
 
 COPY . /home/appuser
 
+# The GitHub Action gives permisison denied if the user is not root. TODO: hardening
 # USER appuser:appgroup
 
 ENTRYPOINT ["/bin/bash", "-c"]
